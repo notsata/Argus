@@ -1,0 +1,82 @@
+{
+  "name": "argus",
+  "version": "1.0.1",
+  "description": "Argus — live portfolio tracking dashboard",
+  "main": "electron-main.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "electron": "electron .",
+    "build": "electron-builder --win portable",
+    "build-installer": "electron-builder --win nsis",
+    "publish": "electron-builder --win nsis --publish always"
+  },
+  "build": {
+    "appId": "com.portfolio.terminal",
+    "productName": "Portfolio Terminal",
+    "copyright": "Portfolio Terminal",
+    "directories": {
+      "output": "dist-electron"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "notsata",
+        "repo": "Argus",
+        "private": false
+      }
+    ],
+    "files": [
+      "electron-main.js",
+      "preload.js",
+      "server.js",
+      "public/**/*",
+      "node_modules/**/*",
+      "!node_modules/.bin",
+      "!**/node_modules/nodemon/**",
+      "!**/node_modules/pkg/**",
+      "!**/node_modules/electron-builder/**",
+      "!**/node_modules/electron/**"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "artifactName": "PortfolioTerminal-Setup-${version}.exe"
+    },
+    "portable": {
+      "artifactName": "PortfolioTerminal-portable.exe"
+    }
+  },
+  "pkg": {
+    "assets": [
+      "public/**/*"
+    ],
+    "targets": [
+      "node18-win-x64"
+    ]
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.3",
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "electron": "^28.3.3",
+    "electron-builder": "^24.13.3",
+    "nodemon": "^3.1.9",
+    "pkg": "^5.8.1"
+  }
+}
