@@ -5,6 +5,17 @@ const path    = require('path');
 const fs      = require('fs');
 const crypto  = require('crypto');
 
+// Simple in-memory rate limiter (per key, per minute)
+const _rlBuckets = {};
+function _rateLimit(key, max) {
+  const now = Date.now();
+  if (!_rlBuckets[key]) _rlBuckets[key] = [];
+  _rlBuckets[key] = _rlBuckets[key].filter(t => now - t < 60000);
+  if (_rlBuckets[key].length >= max) return false;
+  _rlBuckets[key].push(now);
+  return true;
+}
+
 // ── Encryption helpers (AES-256-GCM) ─────────────────────────────────────────
 // Key is set by electron-main.js via ARGUS_CRYPTO_KEY (64 hex chars = 32 bytes).
 // Falls back to plain JSON when the key isn't present (dev/non-Electron runs).
@@ -183,6 +194,7 @@ app.post('/api/setup', (req, res) => {
 
 // ── Reset portfolio ───────────────────────────────────────────────────────────
 app.delete('/api/setup', (_req, res) => {
+  if (!_rateLimit('reset', 5)) return res.status(429).json({ error: 'Too many requests' });
   HOLDINGS = [];
   try { fs.unlinkSync(HOLDINGS_FILE); } catch {}
   res.json({ success: true });
@@ -504,7 +516,7 @@ app.get('/api/portfolio-history', async (_req, res) => {
         });
         return { symbol: h.symbol, shares: h.shares, costBasis: h.costBasis, prices };
       } catch (e) {
-        console.warn(`[portfolio-history] ${h.symbol}:`, e.message);
+        console.warn('[portfolio-history]', h.symbol + ':', e.message);
         return { symbol: h.symbol, shares: h.shares, costBasis: h.costBasis, prices: {} };
       }
     }));
