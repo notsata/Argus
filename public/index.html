@@ -2786,13 +2786,19 @@ function updateAutoRefreshDisplay() {
 
 async function loadHistory() {
   try {
-    const [snapRes, benchRes] = await Promise.all([
+    const [snapRes, histRes, benchRes] = await Promise.all([
       fetch('/api/snapshots'),
+      fetch('/api/portfolio-history'),
       fetch('/api/benchmark'),
     ]);
     const { snapshots }  = await snapRes.json();
+    const { history }    = await histRes.json();
     const { benchmarks } = await benchRes.json();
-    _historySnaps = snapshots  || [];
+
+    const byDate = {};
+    (history   || []).forEach(h => { byDate[h.date] = h; });
+    (snapshots  || []).forEach(s => { byDate[s.date] = s; });
+    _historySnaps = Object.values(byDate).sort((a, b) => a.date < b.date ? -1 : 1);
     _historyBench = benchmarks || [];
     renderHistoryStats();
     renderHistoryChart();
