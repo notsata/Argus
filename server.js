@@ -134,14 +134,20 @@ async function getYahooAuth() {
 
 async function fetchYahooQuotes(symbols) {
   await getYahooAuth();
-  const url =
+  const buildUrl = () =>
     `https://query1.finance.yahoo.com/v7/finance/quote` +
     `?symbols=${encodeURIComponent(symbols.join(','))}` +
     `&crumb=${encodeURIComponent(_crumb)}` +
     `&fields=regularMarketPrice,regularMarketChange,regularMarketChangePercent,` +
     `fiftyTwoWeekHigh,fiftyTwoWeekLow,earningsTimestamp,earningsTimestampStart,` +
     `earningsTimestampEnd,epsForwardAnnual,epsTrailingTwelveMonths,longName,shortName`;
-  const res = await fetch(url, { headers: { 'User-Agent': UA, 'Cookie': _cookie } });
+  let res = await fetch(buildUrl(), { headers: { 'User-Agent': UA, 'Cookie': _cookie } });
+  if (res.status === 401) {
+    // Token expired — re-auth once and retry
+    _cookie = null; _crumb = null;
+    await getYahooAuth();
+    res = await fetch(buildUrl(), { headers: { 'User-Agent': UA, 'Cookie': _cookie } });
+  }
   if (!res.ok) { _cookie = null; _crumb = null; throw new Error(`Yahoo Finance HTTP ${res.status}`); }
   const json = await res.json();
   const results = json?.quoteResponse?.result;
@@ -171,6 +177,7 @@ app.post('/api/setup', (req, res) => {
     return res.status(400).json({ error: 'No valid holdings provided' });
   HOLDINGS = validated;
   saveHoldings(validated);
+  _portfolioHistoryCache = null; // invalidate on holdings change
   res.json({ success: true, count: validated.length });
 });
 
@@ -466,6 +473,73 @@ app.get('/api/market-overview', async (_req, res) => {
     _marketCache = payload; _marketCacheTs = Date.now();
     res.json(payload);
   } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── Historical portfolio value (1-year daily closes) ─────────────────────────
+let _portfolioHistoryCache = null;
+let _portfolioHistoryCacheTs = 0;
+const PORTFOLIO_HISTORY_TTL = 60 * 60 * 1000; // 1 hour
+
+app.get('/api/portfolio-history', async (_req, res) => {
+  if (_portfolioHistoryCache && (Date.now() - _portfolioHistoryCacheTs) < PORTFOLIO_HISTORY_TTL)
+    return res.json(_portfolioHistoryCache);
+  if (HOLDINGS.length === 0) return res.json({ history: [] });
+  try {
+    await getYahooAuth();
+
+    // Fetch 1-year daily closes for every holding in parallel
+    const holdingData = await Promise.all(HOLDINGS.map(async h => {
+      try {
+        const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(h.symbol)}` +
+                    `?interval=1d&range=1y&crumb=${encodeURIComponent(_crumb)}`;
+        const r = await fetch(url, { headers: { 'User-Agent': UA, 'Cookie': _cookie } });
+        if (!r.ok) { if (r.status === 401) { _cookie = null; _crumb = null; } throw new Error(`HTTP ${r.status}`); }
+        const json       = await r.json();
+        const result     = json?.chart?.result?.[0];
+        const timestamps = result?.timestamp || [];
+        const closes     = result?.indicators?.quote?.[0]?.close || [];
+        const prices     = {};
+        timestamps.forEach((ts, i) => {
+          if (closes[i] != null) prices[new Date(ts * 1000).toISOString().split('T')[0]] = closes[i];
+        });
+        return { symbol: h.symbol, shares: h.shares, costBasis: h.costBasis, prices };
+      } catch (e) {
+        console.warn(`[portfolio-history] ${h.symbol}:`, e.message);
+        return { symbol: h.symbol, shares: h.shares, costBasis: h.costBasis, prices: {} };
+      }
+    }));
+
+    // Union of all dates that appear in any holding's price history
+    const allDates = new Set();
+    holdingData.forEach(h => Object.keys(h.prices).forEach(d => allDates.add(d)));
+    const sortedDates = Array.from(allDates).sort();
+
+    const totalCostBasis = HOLDINGS.reduce((s, h) => s + h.shares * h.costBasis, 0);
+
+    const history = sortedDates.map(date => {
+      let totalValue = 0;
+      holdingData.forEach(h => {
+        // Use that day's close if available, otherwise fall back to cost basis
+        totalValue += h.shares * (h.prices[date] ?? h.costBasis);
+      });
+      const totalGain = totalValue - totalCostBasis;
+      return {
+        date,
+        totalValue:     +totalValue.toFixed(2),
+        totalCostBasis: +totalCostBasis.toFixed(2),
+        totalGain:      +totalGain.toFixed(2),
+        totalGainPct:   totalCostBasis ? +((totalGain / totalCostBasis) * 100).toFixed(4) : 0,
+      };
+    });
+
+    const payload = { history, asOf: new Date().toISOString() };
+    _portfolioHistoryCache = payload;
+    _portfolioHistoryCacheTs = Date.now();
+    res.json(payload);
+  } catch (err) {
+    console.error('[portfolio-history]', err.message);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // ── Start ─────────────────────────────────────────────────────────────────────

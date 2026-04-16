@@ -879,11 +879,21 @@ tbody tr:hover .row-edit-btn{opacity:1}
 .pc-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .pc-period-group,.pc-type-group{display:flex;gap:2px}
 .pc-vsep{width:1px;height:22px;background:var(--border2);flex-shrink:0}
-.pc-period-btn,.pc-type-btn{padding:3px 9px;background:transparent;border:1px solid transparent;border-radius:3px;color:var(--text-2);cursor:pointer;font-family:var(--mono);font-size:10px;letter-spacing:.04em;transition:all .12s;white-space:nowrap}
-.pc-period-btn:hover,.pc-type-btn:hover{background:var(--sel);color:var(--text)}
+.pc-period-btn,.pc-type-btn,.pc-freq-btn{padding:3px 9px;background:transparent;border:1px solid transparent;border-radius:3px;color:var(--text-2);cursor:pointer;font-family:var(--mono);font-size:10px;letter-spacing:.04em;transition:all .12s;white-space:nowrap}
+.pc-period-btn:hover,.pc-type-btn:hover,.pc-freq-btn:hover{background:var(--sel);color:var(--text)}
 .pc-period-btn.active{background:var(--blue-dim);color:var(--blue);border-color:rgba(97,175,239,.3)}
-.pc-type-btn.active{background:var(--sel);color:var(--text);border-color:var(--border2)}
-.pc-chart-wrap{height:210px;position:relative}
+.pc-type-btn.active,.pc-freq-btn.active{background:var(--sel);color:var(--text);border-color:var(--border2)}
+.pc-chart-area{display:flex;align-items:stretch;gap:0}
+.pc-y-rail{width:20px;flex-shrink:0;position:relative;cursor:ns-resize;user-select:none}
+.pc-y-track{position:absolute;left:9px;top:8px;bottom:8px;width:2px;background:var(--border2);border-radius:1px}
+.pc-y-fill{position:absolute;left:6px;width:8px;background:var(--blue);border-radius:2px;cursor:ns-resize;z-index:2}
+.pc-y-thumb{position:absolute;left:50%;transform:translate(-50%,-50%);width:10px;height:10px;border-radius:50%;background:var(--blue);border:2px solid var(--bg2);cursor:ns-resize;z-index:3;transition:box-shadow .12s}
+.pc-y-thumb:hover{box-shadow:0 0 0 4px var(--blue-dim)}
+.pc-chart-footer{display:flex;align-items:center;padding:5px 0 0 22px;gap:8px}
+.pc-zoom-reset{background:transparent;border:1px solid var(--border2);border-radius:3px;color:var(--text-2);cursor:pointer;font-size:12px;line-height:1;padding:2px 7px;font-family:var(--mono);transition:all .12s}
+.pc-zoom-reset:hover{background:var(--sel);color:var(--text)}
+.pc-zoom-reset.engaged{color:var(--blue);border-color:rgba(97,175,239,.3);background:var(--blue-dim)}
+.pc-chart-wrap{height:242px;position:relative;flex:1;min-width:0}
 
 /* ── Walkthrough Tour ────────────────────────────────────────────────────────── */
 /* First-launch prompt */
@@ -1057,10 +1067,28 @@ tbody tr:hover .row-edit-btn{opacity:1}
               <button class="pc-type-btn" onclick="setPcType('candle')">CANDLE</button>
               <button class="pc-type-btn" onclick="setPcType('bar')">BAR</button>
             </div>
+            <div class="pc-vsep"></div>
+            <div class="pc-freq-group">
+              <button class="pc-freq-btn active" data-freq="daily"   onclick="setPcFreq('daily')">D</button>
+              <button class="pc-freq-btn"         data-freq="weekly"  onclick="setPcFreq('weekly')">W</button>
+              <button class="pc-freq-btn"         data-freq="monthly" onclick="setPcFreq('monthly')">M</button>
+              <button class="pc-freq-btn"         data-freq="yearly"  onclick="setPcFreq('yearly')">Y</button>
+            </div>
           </div>
         </div>
-        <div class="pc-chart-wrap" id="pc-chart-wrap">
-          <canvas id="pc-canvas" style="width:100%;height:100%"></canvas>
+        <div class="pc-chart-area">
+          <div class="pc-y-rail" id="pc-y-rail">
+            <div class="pc-y-track"></div>
+            <div class="pc-y-fill" id="pc-y-fill"></div>
+            <div class="pc-y-thumb" id="pc-y-hi" title="Drag to adjust top of range"></div>
+            <div class="pc-y-thumb" id="pc-y-lo" title="Drag to adjust bottom of range"></div>
+          </div>
+          <div class="pc-chart-wrap" id="pc-chart-wrap">
+            <canvas id="pc-canvas" style="width:100%;height:100%"></canvas>
+          </div>
+        </div>
+        <div class="pc-chart-footer">
+          <button class="pc-zoom-reset" id="pc-zoom-reset" onclick="resetPcZoom()" title="Reset Y-axis to fit data">🔍</button>
         </div>
         <div id="pc-empty" style="display:none;padding:24px;text-align:center;color:var(--text-3);font-size:11px">
           Refresh prices to start recording snapshots — the chart builds automatically each day.
@@ -1818,7 +1846,14 @@ async function fetchPrices() {
     renderHeader(data.summary);
     renderTable(data.holdings);
     renderCharts(data.holdings);
-    loadPortfolioChart();
+    // Update today's snapshot live — no extra /api/snapshots round-trip needed
+    { const _d = new Date().toISOString().split('T')[0];
+      const _e = { date: _d, totalValue: data.summary.totalValue,
+                   totalGain: data.summary.totalGain, totalGainPct: data.summary.totalGainPct,
+                   totalCostBasis: data.summary.totalCostBasis };
+      const _i = _pcSnaps.findIndex(s => s.date === _d);
+      if (_i >= 0) _pcSnaps[_i] = _e; else _pcSnaps.push(_e);
+      renderPortfolioChart(); }
 
     // Update any visible side panels
     if (activeTab === 'earnings')       renderEarnings(data.holdings);
@@ -2699,6 +2734,7 @@ async function saveEditModal() {
     if (!r.ok || d.error) throw new Error(d.error);
     closeEditModal();
     await fetchPrices();
+    loadPortfolioChart(); // recompute historical baseline with updated shares
   } catch (e) {
     status.textContent = 'Error: ' + e.message;
     btn.disabled = false; btn.textContent = 'Save Changes';
@@ -2892,12 +2928,23 @@ let pcPeriod = '3M';
 let pcType   = 'area';
 let portfolioValueChart = null;
 let _pcSnaps = [];
+let _pcLiveColors = { c: '#98c379', cd: 'rgba(152,195,121,' };
 
 async function loadPortfolioChart() {
   try {
-    const r = await fetch('/api/snapshots');
-    const { snapshots } = await r.json();
-    _pcSnaps = snapshots || [];
+    // Fetch historical computed values and recorded snapshots in parallel
+    const [snapRes, histRes] = await Promise.all([
+      fetch('/api/snapshots'),
+      fetch('/api/portfolio-history'),
+    ]);
+    const { snapshots } = await snapRes.json();
+    const { history }   = await histRes.json();
+
+    // Merge: computed history fills gaps; recorded snapshots override (more accurate)
+    const byDate = {};
+    (history   || []).forEach(h => { byDate[h.date] = h; });
+    (snapshots  || []).forEach(s => { byDate[s.date] = s; }); // override
+    _pcSnaps = Object.values(byDate).sort((a, b) => a.date < b.date ? -1 : 1);
     renderPortfolioChart();
   } catch(e) { console.warn('[pc]', e.message); }
 }
@@ -2913,6 +2960,166 @@ function setPcType(t) {
   const labels = { area:'AREA', line:'LINE', candle:'CANDLE', bar:'BAR' };
   document.querySelectorAll('.pc-type-btn').forEach(b => b.classList.toggle('active', b.textContent === labels[t]));
   renderPortfolioChart();
+}
+
+let pcFreq = 'daily';
+
+function setPcFreq(f) {
+  pcFreq = f;
+  document.querySelectorAll('.pc-freq-btn').forEach(b => b.classList.toggle('active', b.dataset.freq === f));
+  renderPortfolioChart();
+}
+
+// Downsample snapshots to the chosen frequency; keeps the LAST entry in each bucket
+function _pcResample(snaps) {
+  if (pcFreq === 'daily' || !snaps.length) return snaps;
+  const getKey = date => {
+    if (pcFreq === 'weekly') {
+      // ISO week key: YYYY-Www
+      const dt = new Date(date + 'T12:00:00Z');
+      const day = dt.getUTCDay() || 7;             // Mon=1 … Sun=7
+      dt.setUTCDate(dt.getUTCDate() + 4 - day);    // snap to Thursday (ISO week anchor)
+      const y = dt.getUTCFullYear();
+      const yearStart = new Date(Date.UTC(y, 0, 1));
+      const wk = Math.ceil(((dt - yearStart) / 864e5 + 1) / 7);
+      return `${y}-W${String(wk).padStart(2, '0')}`;
+    }
+    if (pcFreq === 'monthly') return date.slice(0, 7); // YYYY-MM
+    if (pcFreq === 'yearly')  return date.slice(0, 4); // YYYY
+  };
+  const buckets = {};
+  snaps.forEach(s => { buckets[getKey(s.date)] = s; }); // last entry in bucket wins
+  return Object.values(buckets);
+}
+
+// ── Y-axis zoom / pan ─────────────────────────────────────────────────────────
+let _pcYMin = null, _pcYMax = null;   // null = auto
+let _pcDataMin = 0, _pcDataMax = 1;   // actual data extent (set on each render)
+let _pcSliderInited = false;
+let _pcPanStart = null;
+
+function _pcUpdateSlider() {
+  const rail  = document.getElementById('pc-y-rail');
+  const hiEl  = document.getElementById('pc-y-hi');
+  const loEl  = document.getElementById('pc-y-lo');
+  const fillEl = document.getElementById('pc-y-fill');
+  if (!rail || !hiEl || !loEl) return;
+  const H = rail.clientHeight;
+  const pad = 8, innerH = H - pad * 2;
+  // Rail spans the full ±10k range so thumbs can travel end-to-end
+  const railMin = _pcDataMin - 10000;
+  const railMax = _pcDataMax + 10000;
+  const railRange = railMax - railMin || 1;
+  const toPos = v => pad + (1 - (v - railMin) / railRange) * innerH;
+  const hiPos = Math.max(pad, Math.min(H - pad, toPos(_pcYMax ?? _pcDataMax)));
+  const loPos = Math.max(pad, Math.min(H - pad, toPos(_pcYMin ?? _pcDataMin)));
+  hiEl.style.top = hiPos + 'px';
+  loEl.style.top = loPos + 'px';
+  if (fillEl) { fillEl.style.top = hiPos + 'px'; fillEl.style.height = Math.max(0, loPos - hiPos) + 'px'; }
+}
+
+function _pcApplyYBounds(animate) {
+  const btn = document.getElementById('pc-zoom-reset');
+  if (btn) btn.classList.toggle('engaged', _pcYMin !== null || _pcYMax !== null);
+  if (portfolioValueChart && portfolioValueChart._pcType !== 'candle') {
+    portfolioValueChart.options.scales.y.min = _pcYMin ?? undefined;
+    portfolioValueChart.options.scales.y.max = _pcYMax ?? undefined;
+    portfolioValueChart.update(animate ? { duration: 180 } : 'none');
+  }
+  _pcUpdateSlider();
+}
+
+function resetPcZoom() {
+  _pcYMin = null; _pcYMax = null;
+  _pcApplyYBounds(true);
+}
+
+function _railToY(railEl, clientY) {
+  const rect = railEl.getBoundingClientRect();
+  const pad = 8, innerH = rect.height - pad * 2;
+  const t = Math.max(0, Math.min(1, (clientY - rect.top - pad) / innerH));
+  const railMax = _pcDataMax + 10000;
+  const railMin = _pcDataMin - 10000;
+  return railMax - t * (railMax - railMin);
+}
+
+function _initPcSlider() {
+  const hiEl   = document.getElementById('pc-y-hi');
+  const loEl   = document.getElementById('pc-y-lo');
+  const fillEl = document.getElementById('pc-y-fill');
+  const rail   = document.getElementById('pc-y-rail');
+  const canvas = document.getElementById('pc-canvas');
+  if (!hiEl || !loEl || !rail || !canvas) return;
+
+  // Shared pan-start logic used by both the fill handle and the canvas
+  const startPan = (clientY) => {
+    _pcPanStart = { y: clientY, yMin: _pcYMin ?? _pcDataMin, yMax: _pcYMax ?? _pcDataMax };
+  };
+  const doPan = (clientY, heightRef) => {
+    if (!_pcPanStart) return;
+    const span = _pcPanStart.yMax - _pcPanStart.yMin;
+    const shift = ((clientY - _pcPanStart.y) / (heightRef || 1)) * span;
+    let newMin = _pcPanStart.yMin + shift;
+    let newMax = _pcPanStart.yMax + shift;
+    if (newMax > _pcDataMax + 10000) { newMax = _pcDataMax + 10000; newMin = newMax - span; }
+    if (newMin < _pcDataMin - 10000) { newMin = _pcDataMin - 10000; newMax = newMin + span; }
+    _pcYMin = newMin; _pcYMax = newMax;
+    _pcApplyYBounds(false);
+  };
+
+  // Drag the fill bar (between the two thumbs) to pan
+  if (fillEl) {
+    fillEl.addEventListener('mousedown', e => {
+      if (e.button !== 0) return;
+      e.stopPropagation();
+      startPan(e.clientY);
+      fillEl.style.cursor = 'grabbing';
+      const onMove = mv => doPan(mv.clientY, rail.clientHeight - 16);
+      const onUp   = () => {
+        fillEl.style.cursor = 'ns-resize';
+        _pcPanStart = null;
+        window.removeEventListener('mousemove', onMove);
+        window.removeEventListener('mouseup', onUp);
+      };
+      window.addEventListener('mousemove', onMove);
+      window.addEventListener('mouseup', onUp);
+    });
+  }
+
+  const MARGIN = 10000; // max $10k beyond historical high/low
+
+  const clampHi = v => Math.min(v, _pcDataMax + MARGIN);
+  const clampLo = v => Math.max(v, _pcDataMin - MARGIN);
+
+  const makeDrag = isHi => e => {
+    e.preventDefault();
+    const minGap = (_pcDataMax - _pcDataMin) * 0.04;
+    const onMove = mv => {
+      const v = _railToY(rail, mv.clientY);
+      if (isHi) _pcYMax = clampHi(Math.max(v, (_pcYMin ?? _pcDataMin) + minGap));
+      else       _pcYMin = clampLo(Math.min(v, (_pcYMax ?? _pcDataMax) - minGap));
+      _pcApplyYBounds(false);
+    };
+    const onUp = () => { window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp); };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+  };
+  hiEl.addEventListener('mousedown', makeDrag(true));
+  loEl.addEventListener('mousedown', makeDrag(false));
+
+  // Pan: drag on chart canvas shifts both bounds together
+  canvas.addEventListener('mousedown', e => {
+    if (e.button !== 0) return;
+    startPan(e.clientY);
+    canvas.style.cursor = 'grabbing';
+  });
+  window.addEventListener('mousemove', e => {
+    if (!_pcPanStart || !portfolioValueChart?.chartArea) return;
+    doPan(e.clientY, portfolioValueChart.chartArea.height);
+  });
+  window.addEventListener('mouseup', () => {
+    if (_pcPanStart) { _pcPanStart = null; canvas.style.cursor = ''; }
+  });
 }
 
 function _pcFilter(snaps) {
@@ -2931,19 +3138,35 @@ function _pcFilter(snaps) {
 }
 
 function _pcBuildOHLC(snaps) {
-  const n = snaps.length;
-  const bucket = n <= 30 ? 1 : n <= 90 ? 5 : 22;
-  const out = [];
-  for (let i = 0; i < n; i += bucket) {
-    const chunk = snaps.slice(i, i + bucket);
-    const vals  = chunk.map(s => s.totalValue).filter(v => v > 0);
-    if (!vals.length) continue;
-    out.push({
-      date: chunk[Math.floor(chunk.length / 2)].date,
-      o: vals[0], h: Math.max(...vals), l: Math.min(...vals), c: vals[vals.length - 1],
-    });
-  }
-  return out;
+  if (!snaps.length) return [];
+  // Choose grouping by actual calendar period so O/H/L/C have real spread
+  const spanDays = (new Date(snaps[snaps.length-1].date) - new Date(snaps[0].date)) / 864e5;
+  const getKey = spanDays <= 35
+    ? d => d                        // ≤1 month  → daily candles
+    : spanDays <= 200
+      ? d => {                      // ≤6 months → weekly candles
+          const dt = new Date(d + 'T12:00:00Z');
+          const day = dt.getUTCDay() || 7;
+          dt.setUTCDate(dt.getUTCDate() + 4 - day);
+          const y = dt.getUTCFullYear();
+          const wk = Math.ceil(((dt - new Date(Date.UTC(y,0,1))) / 864e5 + 1) / 7);
+          return `${y}-W${String(wk).padStart(2,'0')}`;
+        }
+      : d => d.slice(0, 7);         // >6 months → monthly candles
+
+  const buckets = {};
+  snaps.forEach(s => {
+    const k = getKey(s.date);
+    if (!buckets[k]) buckets[k] = { date: s.date, vals: [] };
+    buckets[k].vals.push(s.totalValue);
+  });
+  return Object.values(buckets).map(b => ({
+    date: b.date,
+    o: b.vals[0],
+    h: Math.max(...b.vals),
+    l: Math.min(...b.vals),
+    c: b.vals[b.vals.length - 1],
+  }));
 }
 
 function renderPortfolioChart() {
@@ -2965,11 +3188,16 @@ function renderPortfolioChart() {
   emptyEl.style.display = 'none';
   wrapEl.style.display  = 'block';
 
-  const filtered = _pcFilter(_pcSnaps);
-  const vals     = filtered.map(s => s.totalValue);
-  const labels   = filtered.map(s => s.date);
-  const firstVal = vals[0]               || 1;
-  const lastVal  = vals[vals.length - 1] || 0;
+  const filtered  = _pcFilter(_pcSnaps);
+  const resampled = _pcResample(filtered);
+  const vals      = resampled.map(s => s.totalValue);
+  const labels    = resampled.map(s => s.date);
+  const firstVal  = vals[0]               || 1;
+  const lastVal   = vals[vals.length - 1] || 0;
+
+  // Track data extent for slider coordinate mapping
+  _pcDataMin = Math.min(...vals) * 0.997;
+  _pcDataMax = Math.max(...vals) * 1.003;
   const change   = lastVal - firstVal;
   const isUp     = change >= 0;
   const color    = isUp ? '#98c379' : '#e06c75';
@@ -2996,38 +3224,85 @@ function renderPortfolioChart() {
   if (candleTip)    candleTip.style.display    = 'none';
   const canvas = document.getElementById('pc-canvas');
   canvas.style.display = '';
-  if (portfolioValueChart) { portfolioValueChart.destroy(); portfolioValueChart = null; }
 
+  // Keep live-dot colors up-to-date (used by the plugin closure)
+  _pcLiveColors.c  = color;
+  _pcLiveColors.cd = colorDim;
+
+  // ── Live dot — glowing circle at the rightmost (current) data point ─────────
+  const liveDotPlugin = {
+    id: 'liveDot',
+    afterDatasetsDraw(chart) {
+      if (pcType === 'bar') return;
+      const meta = chart.getDatasetMeta(0);
+      if (!meta?.data?.length) return;
+      const pt = meta.data[meta.data.length - 1];
+      if (!pt) return;
+      const { x, y } = pt.getProps(['x', 'y'], true);
+      const c2 = chart.ctx;
+      c2.save();
+      // Outer halo
+      c2.beginPath(); c2.arc(x, y, 8, 0, Math.PI * 2);
+      c2.fillStyle = _pcLiveColors.cd + '0.18)'; c2.fill();
+      // Mid ring
+      c2.beginPath(); c2.arc(x, y, 5, 0, Math.PI * 2);
+      c2.fillStyle = _pcLiveColors.cd + '0.35)'; c2.fill();
+      // Solid center
+      c2.beginPath(); c2.arc(x, y, 3, 0, Math.PI * 2);
+      c2.fillStyle = _pcLiveColors.c; c2.fill();
+      c2.restore();
+    }
+  };
+
+  const makeGrad = (ctx2) => {
+    const ch = ctx2.chart;
+    if (!ch.chartArea) return colorDim + '0.15)';
+    const g = ch.ctx.createLinearGradient(0, ch.chartArea.top, 0, ch.chartArea.bottom);
+    g.addColorStop(0, colorDim + '0.3)'); g.addColorStop(1, colorDim + '0.02)');
+    return g;
+  };
+
+  const chartType = pcType === 'bar' ? 'bar' : 'line';
+
+  // ── In-place update when chart type hasn't changed ───────────────────────────
+  if (portfolioValueChart && portfolioValueChart._pcType === pcType) {
+    const ds = portfolioValueChart.data.datasets[0];
+    portfolioValueChart.data.labels = labels;
+    ds.data = vals;
+    if (pcType === 'bar') {
+      ds.backgroundColor = vals.map((v,i) => i===0 ? colorDim+'0.55)' : (v>=vals[i-1] ? 'rgba(152,195,121,.55)' : 'rgba(224,108,117,.55)'));
+      ds.borderColor     = vals.map((v,i) => i===0 ? color             : (v>=vals[i-1] ? '#98c379'              : '#e06c75'));
+    } else {
+      ds.borderColor = color;
+      ds.pointHoverBackgroundColor = color;
+      if (pcType === 'area') ds.backgroundColor = makeGrad;
+    }
+    portfolioValueChart.options.scales.y.min = _pcYMin ?? undefined;
+    portfolioValueChart.options.scales.y.max = _pcYMax ?? undefined;
+    portfolioValueChart.update({ duration: 220 });
+    _pcUpdateSlider();
+    return;
+  }
+
+  // ── Build dataset for new chart ──────────────────────────────────────────────
+  if (portfolioValueChart) { portfolioValueChart.destroy(); portfolioValueChart = null; }
   const ctx = canvas.getContext('2d');
 
   const pcPlugin = {
     id: 'pcHover',
     afterEvent(chart, args) {
       const active = chart.getActiveElements();
-      if (args.event.type === 'mousemove' && active.length) {
-        setDisplay(vals[active[0].index]);
-      } else if (args.event.type === 'mouseout') {
-        setDisplay(lastVal);
-      }
+      if (args.event.type === 'mousemove' && active.length) setDisplay(vals[active[0].index]);
+      else if (args.event.type === 'mouseout') setDisplay(lastVal);
     },
   };
 
-  let type = 'line';
   let dataset;
-
   if (pcType === 'area') {
     dataset = {
       data: vals, borderColor: color, borderWidth: 2, fill: true, tension: 0.3,
       pointRadius: vals.length > 60 ? 0 : 2, pointHoverRadius: 5,
-      pointHoverBackgroundColor: color,
-      backgroundColor(ctx2) {
-        const chart = ctx2.chart;
-        if (!chart.chartArea) return colorDim + '0.15)';
-        const grad = chart.ctx.createLinearGradient(0, chart.chartArea.top, 0, chart.chartArea.bottom);
-        grad.addColorStop(0, colorDim + '0.3)');
-        grad.addColorStop(1, colorDim + '0.02)');
-        return grad;
-      },
+      pointHoverBackgroundColor: color, backgroundColor: makeGrad,
     };
   } else if (pcType === 'line') {
     dataset = {
@@ -3036,19 +3311,18 @@ function renderPortfolioChart() {
       pointHoverBackgroundColor: color, backgroundColor: 'transparent',
     };
   } else { // bar
-    type = 'bar';
     dataset = {
       data: vals,
-      backgroundColor: vals.map((v, i) => i === 0 ? colorDim+'0.55)' : (v >= vals[i-1] ? 'rgba(152,195,121,.55)' : 'rgba(224,108,117,.55)')),
-      borderColor:     vals.map((v, i) => i === 0 ? color             : (v >= vals[i-1] ? '#98c379'              : '#e06c75')),
-      borderWidth: 1, borderRadius: 2,
+      backgroundColor: vals.map((v,i) => i===0 ? colorDim+'0.55)' : (v>=vals[i-1] ? 'rgba(152,195,121,.55)' : 'rgba(224,108,117,.55)')),
+      borderColor:     vals.map((v,i) => i===0 ? color             : (v>=vals[i-1] ? '#98c379'              : '#e06c75')),
+      borderWidth: 1, borderRadius: 3,
     };
   }
 
   portfolioValueChart = new Chart(ctx, {
-    type,
+    type: chartType,
     data: { labels, datasets: [dataset] },
-    plugins: [pcPlugin],
+    plugins: pcType !== 'bar' ? [pcPlugin, liveDotPlugin] : [pcPlugin],
     options: {
       responsive: true, maintainAspectRatio: false,
       interaction: { mode: 'index', intersect: false },
@@ -3069,13 +3343,20 @@ function renderPortfolioChart() {
           grid:  { color:'rgba(38,80,130,.1)' }, border:{ color:'rgba(38,80,130,.3)' },
         },
         y: {
-          ticks: { color:'#4a6080', font:{ family:'monospace', size:10 }, callback: v => '$'+(v>=1000?(v/1000).toFixed(0)+'K':v.toFixed(0)) },
+          min: _pcYMin ?? undefined,
+          max: _pcYMax ?? undefined,
+          ticks: { color:'#4a6080', font:{ family:'monospace', size:10 }, callback: v => '$'+(v>=1000?(v/1000).toFixed(1)+'K':v.toFixed(0)) },
           grid:  { color:'rgba(38,80,130,.1)' }, border:{ color:'rgba(38,80,130,.3)' },
         },
       },
       animation: { duration: 350 },
     },
   });
+  portfolioValueChart._pcType = pcType;
+  if (!_pcSliderInited) { _pcSliderInited = true; _initPcSlider(); }
+  _pcUpdateSlider();
+  const btn = document.getElementById('pc-zoom-reset');
+  if (btn) btn.classList.toggle('engaged', _pcYMin !== null || _pcYMax !== null);
 }
 
 function _pcDrawCandles(wrapEl, ohlc, lastVal, firstVal, setDisplay) {
@@ -3502,6 +3783,7 @@ async function executeTrade() {
     status.style.color = 'var(--green)';
 
     await fetchPrices();
+    loadPortfolioChart(); // recompute historical baseline with updated shares
     _renderTradeChips();
     updateTradePreview();
   } catch (e) {
