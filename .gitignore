@@ -1,7 +1,7 @@
 node_modules/
 dist-electron/
 *.log
-.portfolio-key
-portfolio-holdings.json
-portfolio-snapshots.json
-portfolio-alerts.json
+.argus-key
+argus-holdings.json
+argus-snapshots.json
+argus-alerts.json

@@ -3,19 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Portfolio Terminal</title>
+<title>Argus</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 /* ── Reset & Variables — One Dark Pro ──────────────────────────────────────── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:        #21252b;
-  --bg2:       #1b1f23;
-  --surface:   #282c34;
-  --card:      #2c313c;
-  --border:    #181a1f;
-  --border2:   #2d3039;
-  --sel:       #3e4451;
+  /* ── Moonlit (default) ──────────────────────────────────────── */
+  --bg:        #0a0f24;
+  --bg2:       #060b1a;
+  --surface:   #0f1535;
+  --card:      #121c3a;
+  --border:    #0d1332;
+  --border2:   #1a2248;
+  --sel:       #1f2f5a;
   --green:     #98c379;
   --green-dim: rgba(152,195,121,.1);
   --red:       #e06c75;
@@ -30,14 +31,211 @@
   --text-2:    #5c6370;
   --text-3:    #3e4451;
   --mono:      'Cascadia Code','JetBrains Mono','Fira Code',Consolas,monospace;
+  /* ── Theme-sensitive gradient palette (overridden per theme) ── */
+  --body-bg:  #0a0e27;
+  --gc-1:#0f1535; --gc-2:#131e48; --gc-3:#0d1333; --gc-4:#111b42;
+  --hc-1:#060b1a; --hc-2:#0c1535; --hc-3:#07102a; --hc-4:#0b1432;
+  --hc-5:#091228; --hc-6:#0a1330;
+  --orb1:rgba(26,31,77,.9);   --orb2:rgba(45,58,140,.42);
+  --orb3:rgba(13,27,61,.82);  --orb4:rgba(30,27,75,.5);
 }
-html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--mono);font-size:13px;line-height:1.5;overflow:hidden}
+
+/* ── Amber theme ────────────────────────────────────────────────────────────── */
+[data-theme="amber"]{
+  --bg:        #221100;
+  --bg2:       #160900;
+  --surface:   #321a00;
+  --card:      #3d2200;
+  --border:    #2a1400;
+  --border2:   #452800;
+  --sel:       #5c3600;
+  --blue:      #e8a020;
+  --blue-dim:  rgba(232,160,32,.15);
+  --yellow:    #f5c050;
+  --yellow-dim:rgba(245,192,80,.12);
+  --text:      #d8c4a8;
+  --text-2:    #8e7258;
+  --text-3:    #5a4638;
+  --body-bg:   #1a0b00;
+  --gc-1:#321a00; --gc-2:#4a2600; --gc-3:#281400; --gc-4:#3d2000;
+  --hc-1:#160900; --hc-2:#2c1400; --hc-3:#1e0d00; --hc-4:#251100;
+  --hc-5:#210f00; --hc-6:#2c1300;
+  --orb1:rgba(150,70,8,.9);  --orb2:rgba(200,105,14,.44);
+  --orb3:rgba(105,48,5,.84); --orb4:rgba(165,85,10,.52);
+}
+
+/* ── Macha theme ────────────────────────────────────────────────────────────── */
+[data-theme="matcha"]{
+  --bg:        #0e200d;
+  --bg2:       #091509;
+  --surface:   #162a15;
+  --card:      #1c3219;
+  --border:    #122112;
+  --border2:   #1e3820;
+  --sel:       #274a26;
+  --blue:      #72d088;
+  --blue-dim:  rgba(114,208,136,.15);
+  --green:     #96e090;
+  --green-dim: rgba(150,224,144,.12);
+  --text:      #b5c5ac;
+  --text-2:    #688068;
+  --text-3:    #475847;
+  --body-bg:   #091509;
+  --gc-1:#162a15; --gc-2:#1e3820; --gc-3:#122214; --gc-4:#1a2e1a;
+  --hc-1:#091509; --hc-2:#112511; --hc-3:#0d1d0d; --hc-4:#0f210f;
+  --hc-5:#0e1e0e; --hc-6:#112411;
+  --orb1:rgba(22,95,22,.9);  --orb2:rgba(40,140,38,.44);
+  --orb3:rgba(14,72,14,.84); --orb4:rgba(30,108,28,.52);
+}
+
+html,body{height:100%;background:var(--body-bg);color:var(--text);font-family:var(--mono);font-size:13px;line-height:1.5;overflow:hidden}
+
+/* ── Animated background (outside #app, zoom-immune) ───────────────────────── */
+#bg-canvas{
+  position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:var(--body-bg);overflow:hidden;
+}
+.bg-orb{
+  position:absolute;border-radius:50%;
+  will-change:transform,opacity;
+}
+/* Orb 1 — large blue-indigo, top-left */
+.bg-orb-1{
+  width:80vmax;height:80vmax;
+  top:-18%;left:-14%;
+  background:radial-gradient(circle at center,var(--orb1) 0%,transparent 65%);
+  filter:blur(60px);
+  animation:orb1 29s ease-in-out infinite;
+  animation-delay:-7s;
+}
+/* Orb 2 — accent cobalt, top-right */
+.bg-orb-2{
+  width:65vmax;height:65vmax;
+  top:4%;right:-18%;
+  background:radial-gradient(circle at center,var(--orb2) 0%,transparent 65%);
+  filter:blur(70px);
+  animation:orb2 37s ease-in-out infinite;
+  animation-delay:-15s;
+}
+/* Orb 3 — deep navy, bottom-center */
+.bg-orb-3{
+  width:90vmax;height:90vmax;
+  bottom:-28%;left:14%;
+  background:radial-gradient(circle at center,var(--orb3) 0%,transparent 65%);
+  filter:blur(80px);
+  animation:orb3 43s ease-in-out infinite;
+  animation-delay:-22s;
+}
+/* Orb 4 — indigo, center */
+.bg-orb-4{
+  width:55vmax;height:55vmax;
+  top:32%;left:24%;
+  background:radial-gradient(circle at center,var(--orb4) 0%,transparent 65%);
+  filter:blur(50px);
+  animation:orb4 31s ease-in-out infinite;
+  animation-delay:-10s;
+}
+/* Noise grain overlay — prevents banding on dark gradients */
+.bg-noise{
+  position:absolute;inset:0;
+  opacity:.032;
+  filter:url(#noise-filter);
+  background:#fff;
+}
+@keyframes orb1{
+  0%,100%{transform:translate(0,0) scale(1);opacity:.9}
+  33%    {transform:translate(8vw,6vh) scale(1.1);opacity:.7}
+  66%    {transform:translate(-5vw,13vh) scale(.93);opacity:1}
+}
+@keyframes orb2{
+  0%,100%{transform:translate(0,0) scale(1);opacity:.42}
+  40%    {transform:translate(-10vw,9vh) scale(1.18);opacity:.28}
+  70%    {transform:translate(-4vw,-11vh) scale(.88);opacity:.52}
+}
+@keyframes orb3{
+  0%,100%{transform:translate(0,0) scale(1);opacity:.82}
+  30%    {transform:translate(11vw,-9vh) scale(1.12);opacity:.62}
+  70%    {transform:translate(-7vw,-4vh) scale(1.06);opacity:.88}
+}
+@keyframes orb4{
+  0%,100%{transform:translate(0,0) scale(1);opacity:.5}
+  50%    {transform:translate(13vw,11vh) scale(1.22);opacity:.3}
+}
+@media(prefers-reduced-motion:reduce){.bg-orb{animation:none!important}}
+
+/* ── Organic surface micro-gradients ────────────────────────────────────────── */
+/* Strategy: linear-gradient(var(--angle)) animated via @property.               */
+/* A rotating LINEAR gradient has NO focal point (unlike conic) — it's a pure   */
+/* plane of colour that sweeps around the element. Over a full 360° meander it   */
+/* passes through every direction. All stops are fully opaque so there are no    */
+/* transparency-compositing seams. Start == end colour so 0°/360° is seamless.  */
+
+@property --sa { syntax:'<angle>'; inherits:false; initial-value:0deg; }
+@property --ha { syntax:'<angle>'; inherits:false; initial-value:0deg; }
+
+/* Meander keyframes: wander forward/back through angle space — not a dumb spin */
+@keyframes sa-meander {
+  0%   { --sa:   0deg }
+  15%  { --sa: 130deg }
+  35%  { --sa:  55deg }
+  55%  { --sa: 215deg }
+  75%  { --sa: 100deg }
+  90%  { --sa: 305deg }
+  100% { --sa: 360deg }
+}
+@keyframes ha-meander {
+  0%   { --ha:   0deg }
+  20%  { --ha: 155deg }
+  45%  { --ha:  75deg }
+  65%  { --ha: 250deg }
+  85%  { --ha: 130deg }
+  100% { --ha: 360deg }
+}
+
+/* Header — rotating linear plane, no focal point                               */
+#header{
+  background: linear-gradient(
+    var(--ha),
+    var(--hc-1) 0%, var(--hc-2) 50%, var(--hc-1) 100%
+  );
+  animation: ha-meander 58s ease-in-out infinite;
+}
+/* Tab bar — same angle property, different duration keeps them out of phase     */
+#tab-bar{
+  background: linear-gradient(
+    var(--ha),
+    var(--hc-1) 0%, var(--hc-5) 50%, var(--hc-1) 100%
+  );
+  animation: ha-meander 51s ease-in-out infinite;
+  animation-delay: -22s;
+}
+
+/* Content cards — 3-stop gradient avoids dark mid-valley that appears as a line */
+.chart-card,.tool-card,.history-chart-card,.pc-section,#settings-panel{
+  background: linear-gradient(
+    var(--sa),
+    var(--gc-1) 0%, var(--gc-2) 50%, var(--gc-1) 100%
+  );
+}
+/* Independent durations + large negative delays — never in sync                */
+.chart-card              { animation: sa-meander 43s ease-in-out infinite; }
+.chart-card + .chart-card{ animation: sa-meander 55s ease-in-out infinite; animation-delay:-18s; }
+.tool-card               { animation: sa-meander 38s ease-in-out infinite; animation-delay:-9s;  }
+.history-chart-card      { animation: sa-meander 49s ease-in-out infinite; animation-delay:-25s; }
+.pc-section              { animation: sa-meander 46s ease-in-out infinite; animation-delay:-12s; }
+#settings-panel          { animation: sa-meander 41s ease-in-out infinite; animation-delay:-6s;  }
+
+@media(prefers-reduced-motion:reduce){
+  #header,#tab-bar,.chart-card,.tool-card,.history-chart-card,.pc-section,#settings-panel{
+    animation:none!important;
+  }
+}
 
 /* ── Header — 3-column centered layout ─────────────────────────────────────── */
 #header{
   display:grid;grid-template-columns:1fr auto 1fr;
   align-items:center;padding:0 20px;height:44px;
-  background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0;
+  border-bottom:1px solid var(--border);flex-shrink:0;
 }
 .logo{
   display:flex;align-items:center;gap:8px;
@@ -71,7 +269,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
 /* ── Tab Bar — VS Code editor tabs ─────────────────────────────────────────── */
 #tab-bar{
   display:flex;align-items:stretch;
-  background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0;
+  border-bottom:1px solid var(--border);flex-shrink:0;
 }
 .tab-btn{
   padding:0 18px;height:37px;border:none;
@@ -90,8 +288,9 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
 }
 
 /* ── App Layout ────────────────────────────────────────────────────────────── */
-#app{display:flex;flex-direction:column;height:100vh}
-#main-col{flex:1;overflow-y:auto;padding:18px 20px}
+/* position:fixed + transform-scale zoom: elements outside #app are unaffected */
+#app{position:fixed;top:0;left:0;display:flex;flex-direction:column;width:100vw;height:100vh;transform-origin:top left}
+#main-col{flex:1;overflow-y:auto;overflow-x:hidden;padding:18px 20px}
 .tab-panel{display:none}
 .tab-panel.active{display:block}
 
@@ -130,22 +329,31 @@ td:first-child{text-align:left}
 }
 
 /* ── Charts Row ────────────────────────────────────────────────────────────── */
-.charts-row{display:grid;grid-template-columns:290px 1fr;gap:14px;margin-bottom:16px}
-.chart-card{
-  background:var(--surface);border:1px solid var(--border);border-radius:4px;
-  padding:16px;
+/* Fixed row height keeps both cards equal and prevents sector chart overflow   */
+.charts-row{
+  display:grid;grid-template-columns:minmax(180px,290px) 1fr;
+  gap:14px;margin-bottom:16px;height:270px;
 }
-.chart-title{font-size:10px;color:var(--text-2);letter-spacing:.06em;margin-bottom:14px;text-transform:uppercase}
-.donut-wrap{position:relative;height:178px;display:flex;justify-content:center}
+.chart-card{
+  border:1px solid var(--border);border-radius:4px;
+  padding:16px;
+  /* flex column so canvas wrappers can grow/shrink to fill remaining card space */
+  display:flex;flex-direction:column;overflow:hidden;
+}
+.chart-title{font-size:10px;color:var(--text-2);letter-spacing:.06em;margin-bottom:14px;text-transform:uppercase;flex-shrink:0}
+/* donut-wrap as a plain block — Chart.js needs a block parent to measure width */
+.donut-wrap{position:relative;flex:1;min-height:0;overflow:hidden}
 .donut-center{
   position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
   text-align:center;pointer-events:none;
 }
 .donut-center .dc-val{font-size:17px;font-weight:600;color:var(--text)}
 .donut-center .dc-label{font-size:9px;color:var(--text-2);letter-spacing:.06em;text-transform:uppercase}
-.sector-wrap{height:198px}
+/* sector-wrap fills card, overflow:hidden clips chart canvas to container */
+.sector-wrap{flex:1;min-height:0;overflow:hidden}
 .legend-grid{
-  display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;margin-top:12px;max-height:100px;overflow:hidden;
+  display:grid;grid-template-columns:1fr 1fr;gap:3px 10px;
+  margin-top:8px;max-height:72px;overflow:hidden;flex-shrink:0;
 }
 .legend-item{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--text-2)}
 .legend-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
@@ -195,7 +403,7 @@ select.tool-input{cursor:pointer}
 .calc-grid{display:grid;grid-template-columns:360px 1fr;gap:14px;align-items:start}
 @media(max-width:900px){.calc-grid{grid-template-columns:1fr}}
 .tool-card{
-  background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:18px;
+  border:1px solid var(--border);border-radius:4px;padding:18px;
 }
 .ticker-row{display:flex;gap:8px;align-items:center}
 .ticker-row .tool-input{flex:1}
@@ -239,11 +447,11 @@ select.tool-input{cursor:pointer}
 .threshold-label{font-size:10px;color:var(--text-2);letter-spacing:.05em;white-space:nowrap}
 .threshold-val{font-size:14px;font-weight:600;color:var(--blue);min-width:40px}
 input[type=range]{
-  -webkit-appearance:none;width:150px;height:3px;border-radius:2px;
+  -webkit-appearance:none;appearance:none;width:150px;height:3px;border-radius:2px;
   background:var(--border2);outline:none;cursor:pointer;border:none;
 }
 input[type=range]::-webkit-slider-thumb{
-  -webkit-appearance:none;width:13px;height:13px;border-radius:50%;
+  -webkit-appearance:none;appearance:none;width:13px;height:13px;border-radius:50%;
   background:var(--blue);cursor:pointer;
 }
 .conc-list{margin-top:16px}
@@ -446,7 +654,7 @@ input[type=range]::-webkit-slider-thumb{
 .alloc-toggle-btn.active{background:var(--blue-dim);color:var(--blue);border-color:rgba(97,175,239,.35)}
 
 /* ── History panel ──────────────────────────────────────────────────────────── */
-.history-chart-card{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:16px;margin-bottom:14px}
+.history-chart-card{border:1px solid var(--border);border-radius:4px;padding:16px;margin-bottom:14px}
 .history-chart-wrap{height:280px;position:relative}
 .history-stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:14px}
 .history-stat-card{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:13px 16px}
@@ -499,9 +707,252 @@ input[type=range]::-webkit-slider-thumb{
 .csv-import-label{flex:1;font-size:11px;color:var(--text-2);line-height:1.4}
 .csv-import-label strong{color:var(--text);display:block;margin-bottom:2px}
 #csv-status{font-size:10px;color:var(--text-2);margin-top:6px;min-height:14px}
+
+/* ── Trade (Buy/Sell) Panel ─────────────────────────────────────────────────── */
+.trade-mode-row{display:flex;gap:0;margin-bottom:16px}
+.trade-mode-btn{
+  padding:7px 24px;border:1px solid var(--border2);color:var(--text-2);
+  cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.06em;
+  text-transform:uppercase;background:transparent;transition:all .15s;
+}
+.trade-mode-btn:first-child{border-radius:3px 0 0 3px}
+.trade-mode-btn:last-child{border-radius:0 3px 3px 0;border-left:none}
+.trade-mode-btn.active.buy {background:var(--green-dim);color:var(--green);border-color:rgba(152,195,121,.4)}
+.trade-mode-btn.active.sell{background:var(--red-dim);  color:var(--red);  border-color:rgba(224,108,117,.4)}
+.trade-layout{display:grid;grid-template-columns:380px 1fr;gap:14px;align-items:start}
+@media(max-width:900px){.trade-layout{grid-template-columns:1fr}}
+.trade-chips{display:flex;flex-wrap:wrap;gap:5px;min-height:26px}
+.trade-chip{
+  display:inline-flex;align-items:center;padding:3px 10px;
+  background:var(--card);border:1px solid var(--border2);border-radius:3px;
+  font-size:11px;color:var(--text-2);cursor:pointer;transition:all .12s;font-family:var(--mono);
+}
+.trade-chip:hover,.trade-chip.active        {background:var(--blue-dim);color:var(--blue);border-color:rgba(97,175,239,.35)}
+.sell-mode .trade-chip:hover,
+.sell-mode .trade-chip.active               {background:var(--red-dim); color:var(--red); border-color:rgba(224,108,117,.35)}
+.tr-total-val{font-size:22px;font-weight:600;color:var(--text);font-variant-numeric:tabular-nums;margin-top:4px}
+.tr-execute-btn{
+  width:100%;padding:10px 18px;background:var(--blue);border:none;border-radius:3px;
+  color:var(--bg);font-family:var(--mono);font-size:12px;font-weight:600;
+  cursor:pointer;transition:opacity .15s;letter-spacing:.02em;margin-top:6px;
+}
+.tr-execute-btn:hover{opacity:.85}
+.tr-execute-btn:disabled{opacity:.35;cursor:not-allowed}
+.tr-execute-btn.sell-btn{background:var(--red)}
+.tr-preview-row{display:flex;flex-direction:column;padding:13px 0;border-bottom:1px solid var(--border)}
+.tr-preview-row:last-child{border-bottom:none}
+.tr-preview-label{font-size:9px;color:var(--text-2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px}
+.tr-preview-val{font-size:18px;font-weight:600;color:var(--text);font-variant-numeric:tabular-nums}
+.tr-preview-sub{font-size:10px;color:var(--text-2);margin-top:3px}
+.tr-preview-after{border-radius:4px;padding:13px 16px;margin-top:10px}
+.tr-preview-after.buy {background:rgba(152,195,121,.07);border:1px solid rgba(152,195,121,.2)}
+.tr-preview-after.sell{background:rgba(97,175,239,.07); border:1px solid rgba(97,175,239,.2)}
+.tr-preview-after.close{background:var(--red-dim);      border:1px solid rgba(224,108,117,.2)}
+.tr-arrow{color:var(--text-3);font-size:11px;margin:6px 0;padding-left:2px}
+
+/* ── Inline position editor modal ──────────────────────────────────────────── */
+#edit-backdrop{
+  position:fixed;inset:0;background:rgba(0,0,0,.55);
+  z-index:1002;display:flex;align-items:center;justify-content:center;
+}
+#edit-panel{
+  border:1px solid var(--border2);border-radius:6px;
+  padding:22px 24px;width:390px;max-width:calc(100vw - 32px);
+  box-shadow:0 8px 32px rgba(0,0,0,.45);
+  animation:sa-meander 44s ease-in-out infinite;animation-delay:-14s;
+}
+.ep-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px}
+.ep-label{font-size:9px;letter-spacing:.08em;color:var(--text-2);text-transform:uppercase;margin-bottom:4px}
+.ep-sym{font-size:17px;font-weight:600;color:var(--blue)}
+.ep-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.ep-field{display:flex;flex-direction:column;gap:5px}
+.ep-field label{font-size:9px;color:var(--text-2);letter-spacing:.05em;text-transform:uppercase}
+.ep-field-full{grid-column:1/-1}
+.ep-actions{display:flex;gap:8px;justify-content:flex-end}
+.ep-save-btn{
+  padding:7px 18px;background:var(--blue);border:none;border-radius:3px;
+  color:var(--bg);font-family:var(--mono);font-size:11px;font-weight:600;
+  cursor:pointer;transition:opacity .15s;letter-spacing:.02em;
+}
+.ep-save-btn:hover{opacity:.85}
+.ep-save-btn:disabled{opacity:.4;cursor:not-allowed}
+.ep-status{font-size:10px;margin-top:8px;min-height:14px;color:var(--red)}
+.row-edit-btn{
+  background:none;border:none;color:var(--text-3);cursor:pointer;
+  padding:2px 5px;line-height:1;opacity:0;transition:opacity .12s,color .12s;vertical-align:middle;
+}
+tbody tr:hover .row-edit-btn{opacity:1}
+.row-edit-btn:hover{color:var(--blue)}
+
+/* ── Settings gear button & modal (zoom-immune: outside #app) ───────────────── */
+#settings-gear{
+  position:fixed;bottom:16px;right:16px;width:36px;height:36px;border-radius:50%;
+  background:var(--surface);border:1px solid var(--border2);color:var(--text-2);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  z-index:1000;transition:all .15s;
+}
+#settings-gear:hover{background:var(--sel);color:var(--text);border-color:var(--sel)}
+#settings-backdrop{
+  position:fixed;inset:0;background:rgba(0,0,0,.55);
+  z-index:1001;display:flex;align-items:center;justify-content:center;
+}
+#settings-panel{
+  border:1px solid var(--border2);border-radius:6px;
+  padding:22px 24px;width:400px;max-width:calc(100vw - 32px);
+  box-shadow:0 8px 32px rgba(0,0,0,.45);
+}
+.sp-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.sp-title{font-size:11px;letter-spacing:.08em;color:var(--text-2);text-transform:uppercase}
+.sp-close{background:transparent;border:none;color:var(--text-2);cursor:pointer;font-size:16px;line-height:1;padding:2px 6px;transition:color .12s;font-family:var(--mono)}
+.sp-close:hover{color:var(--text)}
+.sp-label{font-size:12px;color:var(--text);margin-bottom:3px}
+.sp-desc{font-size:10px;color:var(--text-3);margin-top:3px;line-height:1.5;margin-bottom:10px}
+.zoom-row{display:flex;align-items:center;gap:12px;margin-top:10px}
+.zoom-val{font-size:15px;font-weight:600;color:var(--blue);min-width:46px;text-align:center;font-variant-numeric:tabular-nums}
+.zoom-row input[type=range]{flex:1;min-width:0}
+.zoom-presets{display:flex;gap:4px;margin-top:10px;flex-wrap:wrap}
+.zoom-preset-btn{padding:3px 10px;background:transparent;border:1px solid var(--border2);border-radius:3px;color:var(--text-2);cursor:pointer;font-family:var(--mono);font-size:10px;transition:all .12s}
+.zoom-preset-btn:hover{background:var(--sel);color:var(--text)}
+.zoom-preset-btn.active{background:var(--blue-dim);color:var(--blue);border-color:rgba(97,175,239,.3)}
+.sp-sep{height:1px;background:var(--border2);margin:18px 0}
+.theme-row{display:flex;gap:8px;margin-top:10px}
+.theme-btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:7px;
+  padding:11px 8px;background:transparent;border:1px solid var(--border2);border-radius:4px;
+  cursor:pointer;font-family:var(--mono);font-size:9px;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--text-2);transition:all .15s;
+}
+.theme-btn:hover{border-color:var(--text-2);color:var(--text)}
+.theme-btn.active{border-color:var(--blue);color:var(--blue);background:var(--blue-dim)}
+.theme-swatch{width:36px;height:22px;border-radius:3px;flex-shrink:0;border:1px solid rgba(255,255,255,.06)}
+
+/* ── Market Ticker Bar ──────────────────────────────────────────────────────── */
+#market-ticker{
+  display:flex;align-items:stretch;border:1px solid var(--border);border-radius:4px;
+  overflow:hidden;margin-bottom:16px;min-height:64px;
+}
+.mt-label-col{
+  display:flex;flex-direction:column;justify-content:center;
+  padding:10px 16px;border-right:2px solid var(--cyan);flex-shrink:0;
+  background:var(--bg2);min-width:106px;gap:4px;
+}
+.mt-label-text{
+  display:flex;align-items:center;gap:6px;
+  font-size:11px;font-weight:600;color:var(--text);letter-spacing:.03em;
+}
+.mt-label-dot{
+  width:7px;height:7px;border-radius:50%;background:var(--cyan);flex-shrink:0;
+  box-shadow:0 0 6px var(--cyan);
+}
+.mt-label-asof{font-size:9px;color:var(--text-3);letter-spacing:.04em}
+.mt-scroll-wrap{flex:1;overflow-x:auto;scrollbar-width:none;display:flex;align-items:stretch}
+.mt-scroll-wrap::-webkit-scrollbar{display:none}
+.mt-items{display:flex;align-items:stretch;min-width:max-content}
+.mt-item{
+  display:flex;flex-direction:column;justify-content:center;
+  padding:8px 20px;border-right:1px solid var(--border);min-width:130px;flex-shrink:0;gap:2px;
+}
+.mt-item:last-child{border-right:none}
+.mt-name{font-size:9px;color:var(--text-2);letter-spacing:.06em;text-transform:uppercase}
+.mt-price{font-size:14px;font-weight:600;color:var(--text);font-variant-numeric:tabular-nums;line-height:1.15}
+.mt-chg{font-size:10px;font-variant-numeric:tabular-nums}
+.mt-chg.up{color:var(--green)}
+.mt-chg.dn{color:var(--red)}
+.mt-chg.flat{color:var(--text-2)}
+.mt-scroll-btns{
+  display:flex;flex-direction:column;border-left:1px solid var(--border);
+  background:var(--bg2);flex-shrink:0;
+}
+.mt-scroll-btn{
+  flex:1;display:flex;align-items:center;justify-content:center;
+  background:transparent;border:none;color:var(--text-2);cursor:pointer;
+  padding:0 10px;font-size:14px;transition:color .12s;line-height:1;
+}
+.mt-scroll-btn:hover{color:var(--text)}
+
+/* ── Portfolio Value Chart (Robinhood / Fidelity style) ─────────────────────── */
+.pc-section{border:1px solid var(--border);border-radius:4px;padding:18px 18px 12px;margin-bottom:16px}
+.pc-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px}
+.pc-big-val{font-size:26px;font-weight:600;color:var(--text);font-variant-numeric:tabular-nums;line-height:1.1}
+.pc-change-row{font-size:12px;margin-top:4px}
+.pc-period-label{font-size:10px;color:var(--text-3);margin-left:3px}
+.pc-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.pc-period-group,.pc-type-group{display:flex;gap:2px}
+.pc-vsep{width:1px;height:22px;background:var(--border2);flex-shrink:0}
+.pc-period-btn,.pc-type-btn{padding:3px 9px;background:transparent;border:1px solid transparent;border-radius:3px;color:var(--text-2);cursor:pointer;font-family:var(--mono);font-size:10px;letter-spacing:.04em;transition:all .12s;white-space:nowrap}
+.pc-period-btn:hover,.pc-type-btn:hover{background:var(--sel);color:var(--text)}
+.pc-period-btn.active{background:var(--blue-dim);color:var(--blue);border-color:rgba(97,175,239,.3)}
+.pc-type-btn.active{background:var(--sel);color:var(--text);border-color:var(--border2)}
+.pc-chart-wrap{height:210px;position:relative}
+
+/* ── Walkthrough Tour ────────────────────────────────────────────────────────── */
+/* First-launch prompt */
+#tour-prompt{
+  position:fixed;inset:0;background:rgba(0,0,0,.62);
+  z-index:1600;display:flex;align-items:center;justify-content:center;
+}
+#tour-prompt-card{
+  border:1px solid var(--border2);border-radius:6px;
+  padding:28px 28px 22px;width:400px;max-width:calc(100vw - 32px);
+  box-shadow:0 12px 48px rgba(0,0,0,.65);
+  background:linear-gradient(var(--sa),var(--gc-1) 0%,var(--gc-2) 50%,var(--gc-1) 100%);
+  animation:sa-meander 43s ease-in-out infinite;animation-delay:-8s;
+}
+.tp-logo{display:flex;align-items:center;gap:7px;margin-bottom:16px}
+.tp-logo-dot{width:7px;height:7px;border-radius:50%;background:var(--cyan);box-shadow:0 0 6px var(--cyan)}
+.tp-logo-text{font-size:12px;font-weight:600;color:var(--text-2);letter-spacing:.04em}
+.tp-check-row{display:flex;align-items:center;gap:8px;margin:14px 0 18px;font-size:11px;color:var(--text-2);cursor:pointer;user-select:none}
+.tp-check-row input{accent-color:var(--blue);width:13px;height:13px;cursor:pointer;flex-shrink:0}
+.tp-btns{display:flex;gap:8px;justify-content:flex-end}
+/* Tour overlay + card */
+#tour-overlay{position:fixed;inset:0;z-index:1500;pointer-events:none}
+#tour-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.35);pointer-events:none}
+#tour-card{
+  position:fixed;z-index:1502;width:340px;pointer-events:all;
+  border:1px solid var(--border2);border-radius:6px;padding:20px 22px 18px;
+  box-shadow:0 12px 40px rgba(0,0,0,.65);
+  background:linear-gradient(var(--sa),var(--gc-1) 0%,var(--gc-2) 50%,var(--gc-1) 100%);
+  animation:sa-meander 47s ease-in-out infinite;animation-delay:-19s;
+  transition:top .22s ease,left .22s ease;
+}
+.tc-step{font-size:9px;color:var(--text-2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
+.tc-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:10px;line-height:1.3}
+.tc-body{font-size:12px;color:var(--text-2);line-height:1.65;margin-bottom:16px}
+.tc-btns{display:flex;align-items:center;justify-content:space-between}
+.tc-skip{background:none;border:none;color:var(--text-3);cursor:pointer;font-family:var(--mono);font-size:10px;padding:0;transition:color .12s;pointer-events:all}
+.tc-skip:hover{color:var(--text-2)}
+.tc-next-btn{
+  padding:7px 16px;background:var(--blue);border:none;border-radius:3px;
+  color:var(--bg);font-family:var(--mono);font-size:11px;font-weight:600;
+  cursor:pointer;transition:opacity .15s;pointer-events:all;
+}
+.tc-next-btn:hover{opacity:.85}
+.tour-highlight{
+  outline:2px solid var(--blue) !important;
+  outline-offset:4px;border-radius:4px;
+}
+@media(prefers-reduced-motion:reduce){#tour-card,#tour-prompt-card{animation:none!important}}
 </style>
 </head>
 <body>
+
+<!-- ── Animated Background ───────────────────────────────────────────────────── -->
+<div id="bg-canvas" aria-hidden="true">
+  <!-- SVG noise filter — grain overlay prevents visible color banding -->
+  <svg width="0" height="0" style="position:absolute;overflow:hidden" aria-hidden="true">
+    <defs>
+      <filter id="noise-filter" x="0%" y="0%" width="100%" height="100%" color-interpolation-filters="linearRGB">
+        <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch" result="noise"/>
+        <feColorMatrix in="noise" type="saturate" values="0"/>
+      </filter>
+    </defs>
+  </svg>
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+  <div class="bg-orb bg-orb-3"></div>
+  <div class="bg-orb bg-orb-4"></div>
+  <div class="bg-noise"></div>
+</div>
 
 <div id="app">
 
@@ -509,7 +960,7 @@ input[type=range]::-webkit-slider-thumb{
   <div id="header">
     <div class="logo">
       <div class="logo-dot"></div>
-      Portfolio Terminal
+      Argus
     </div>
     <div class="header-center">
       <div class="stat-group">
@@ -550,6 +1001,7 @@ input[type=range]::-webkit-slider-thumb{
   <!-- ── Tab Bar ────────────────────────────────────────────────────────────── -->
   <div id="tab-bar">
     <button class="tab-btn active" onclick="switchTab('portfolio')">HOLDINGS</button>
+    <button class="tab-btn"        onclick="switchTab('trade')">BUY / SELL</button>
     <button class="tab-btn"        onclick="switchTab('add-calc')">ADD CALC</button>
     <button class="tab-btn"        onclick="switchTab('earnings')">EARNINGS</button>
     <button class="tab-btn"        onclick="switchTab('concentration')">CONCENTRATION</button>
@@ -580,6 +1032,41 @@ input[type=range]::-webkit-slider-thumb{
 
     <!-- ━━━ PANEL: HOLDINGS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
     <div id="panel-portfolio" class="tab-panel active">
+
+      <!-- ── Portfolio Value Chart ──────────────────────────────────────────── -->
+      <div class="pc-section" id="pc-section" style="display:none">
+        <div class="pc-header">
+          <div class="pc-meta">
+            <div class="pc-big-val" id="pc-val">—</div>
+            <div class="pc-change-row" id="pc-chg"></div>
+          </div>
+          <div class="pc-controls">
+            <div class="pc-period-group">
+              <button class="pc-period-btn" onclick="setPcPeriod('1W')">1W</button>
+              <button class="pc-period-btn" onclick="setPcPeriod('1M')">1M</button>
+              <button class="pc-period-btn active" onclick="setPcPeriod('3M')">3M</button>
+              <button class="pc-period-btn" onclick="setPcPeriod('6M')">6M</button>
+              <button class="pc-period-btn" onclick="setPcPeriod('YTD')">YTD</button>
+              <button class="pc-period-btn" onclick="setPcPeriod('1Y')">1Y</button>
+              <button class="pc-period-btn" onclick="setPcPeriod('ALL')">ALL</button>
+            </div>
+            <div class="pc-vsep"></div>
+            <div class="pc-type-group">
+              <button class="pc-type-btn active" onclick="setPcType('area')">AREA</button>
+              <button class="pc-type-btn" onclick="setPcType('line')">LINE</button>
+              <button class="pc-type-btn" onclick="setPcType('candle')">CANDLE</button>
+              <button class="pc-type-btn" onclick="setPcType('bar')">BAR</button>
+            </div>
+          </div>
+        </div>
+        <div class="pc-chart-wrap" id="pc-chart-wrap">
+          <canvas id="pc-canvas" style="width:100%;height:100%"></canvas>
+        </div>
+        <div id="pc-empty" style="display:none;padding:24px;text-align:center;color:var(--text-3);font-size:11px">
+          Refresh prices to start recording snapshots — the chart builds automatically each day.
+        </div>
+      </div>
+
       <div class="table-wrap">
         <table id="holdings-table">
           <thead>
@@ -588,14 +1075,16 @@ input[type=range]::-webkit-slider-thumb{
               <th onclick="sortTable('price')"           data-col="price">       PRICE     <span class="sort-icon">▲</span></th>
               <th onclick="sortTable('change')"          data-col="change">      CHG $     <span class="sort-icon">▲</span></th>
               <th onclick="sortTable('changePct')"       data-col="changePct">   CHG %     <span class="sort-icon">▲</span></th>
+              <th onclick="sortTable('dailyPnL')"        data-col="dailyPnL">    DAILY P&amp;L <span class="sort-icon">▲</span></th>
               <th onclick="sortTable('currentValue')"    data-col="currentValue">VALUE     <span class="sort-icon">▲</span></th>
               <th onclick="sortTable('portfolioWeight')" data-col="portfolioWeight">WEIGHT <span class="sort-icon">▲</span></th>
               <th onclick="sortTable('totalGain')"       data-col="totalGain">   GAIN/LOSS <span class="sort-icon">▲</span></th>
               <th>SECTOR</th>
+              <th style="width:28px"></th>
             </tr>
           </thead>
           <tbody id="holdings-tbody">
-            <tr><td colspan="8" style="text-align:center;padding:24px;color:var(--text-3)">Loading live data…</td></tr>
+            <tr><td colspan="9" style="text-align:center;padding:24px;color:var(--text-3)">Loading live data…</td></tr>
           </tbody>
         </table>
       </div>
@@ -622,6 +1111,110 @@ input[type=range]::-webkit-slider-thumb{
           <div class="sector-wrap">
             <canvas id="sector-chart"></canvas>
           </div>
+        </div>
+      </div>
+
+      <!-- ── Market Overview Ticker ──────────────────────────────────────────── -->
+      <div id="market-ticker">
+        <div class="mt-label-col">
+          <div class="mt-label-text"><div class="mt-label-dot"></div>US Markets</div>
+          <div class="mt-label-asof" id="mt-asof"></div>
+        </div>
+        <div class="mt-scroll-wrap" id="mt-scroll-wrap">
+          <div class="mt-items" id="mt-items">
+            <div class="mt-item"><div class="mt-name">Loading…</div></div>
+          </div>
+        </div>
+        <div class="mt-scroll-btns">
+          <button class="mt-scroll-btn" onclick="mtScroll(-220)" title="Scroll left">‹</button>
+          <button class="mt-scroll-btn" onclick="mtScroll(220)"  title="Scroll right">›</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ━━━ PANEL: BUY / SELL ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <div id="panel-trade" class="tab-panel">
+      <div class="panel-header">
+        <div>
+          <div class="chart-title" style="font-size:12px;margin-bottom:4px">BUY / SELL</div>
+          <div style="font-size:11px;color:var(--text-3)">Execute a trade and update your portfolio automatically. Average cost is recalculated on buys.</div>
+        </div>
+      </div>
+
+      <div class="trade-mode-row">
+        <button class="trade-mode-btn buy active" id="trade-mode-buy"  onclick="setTradeMode('buy')">▲ BUY</button>
+        <button class="trade-mode-btn sell"       id="trade-mode-sell" onclick="setTradeMode('sell')">▼ SELL</button>
+      </div>
+
+      <div class="trade-layout">
+        <!-- LEFT: inputs -->
+        <div class="tool-card">
+          <div class="chart-title">TRADE DETAILS</div>
+
+          <div class="form-row">
+            <span class="tool-label">Ticker Symbol</span>
+            <div class="ticker-row">
+              <input id="tr-symbol" class="tool-input" placeholder="e.g. AAPL"
+                     style="text-transform:uppercase"
+                     oninput="onTradeSymbolInput()"
+                     onkeydown="if(event.key==='Enter')tradeLookup()">
+              <button class="tool-btn" id="tr-lookup-btn" onclick="tradeLookup()">Lookup</button>
+            </div>
+            <div class="su-status" id="tr-lookup-status"></div>
+          </div>
+
+          <div class="form-row">
+            <span class="tool-label">Your Holdings — click to select</span>
+            <div class="trade-chips" id="tr-chips"></div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px" class="form-row">
+            <div>
+              <span class="tool-label">Shares</span>
+              <input id="tr-shares" class="tool-input" type="number" step="any" min="0"
+                     placeholder="0.000" oninput="updateTradePreview()"
+                     onkeydown="if(event.key==='Enter')executeTrade()">
+            </div>
+            <div>
+              <span class="tool-label">Price / Share ($)</span>
+              <input id="tr-price" class="tool-input" type="number" step="any" min="0"
+                     placeholder="0.00" oninput="updateTradePreview()"
+                     onkeydown="if(event.key==='Enter')executeTrade()">
+            </div>
+          </div>
+
+          <!-- Sector selector — only shown for new (non-portfolio) symbols in buy mode -->
+          <div class="form-row tr-new-sector" id="tr-new-sector" style="display:none">
+            <span class="tool-label">Sector <span style="color:var(--text-3)">(new position)</span></span>
+            <select id="tr-sector" class="tool-input">
+              <option>Technology</option><option>Financials</option><option>Health Care</option>
+              <option>Consumer Disc.</option><option>Consumer Staples</option><option>Industrials</option>
+              <option>Energy</option><option>Materials</option><option>Utilities</option>
+              <option>Real Estate</option><option>Communication</option><option>Mutual Fund</option>
+              <option>Index Fund</option><option>ETF</option><option>Commodities</option>
+              <option>Defense</option><option>Transportation</option><option>Other</option>
+            </select>
+          </div>
+
+          <div id="tr-total-row" style="display:none;margin-bottom:8px">
+            <span class="tool-label" id="tr-total-label">Total Cost</span>
+            <div class="tr-total-val" id="tr-total"></div>
+          </div>
+
+          <button class="tr-execute-btn" id="tr-execute-btn" onclick="executeTrade()" disabled>
+            Execute Trade →
+          </button>
+          <div class="su-status" id="tr-status" style="margin-top:8px"></div>
+        </div>
+
+        <!-- RIGHT: preview -->
+        <div class="tool-card" id="tr-preview-card">
+          <div class="chart-title">PREVIEW</div>
+          <div id="tr-preview-empty" style="color:var(--text-2);font-size:11px;padding-top:4px">
+            Select a ticker and enter shares + price to see a preview.
+          </div>
+          <div id="tr-preview-content" style="display:none"></div>
         </div>
       </div>
     </div>
@@ -877,13 +1470,112 @@ input[type=range]::-webkit-slider-thumb{
   </div><!-- /main-col -->
 </div><!-- /app -->
 
+<!-- ── Settings Gear Button (zoom-immune, outside #app) ──────────────────────── -->
+<button id="settings-gear" onclick="toggleSettings()" title="Settings" aria-label="Settings">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="3"/>
+    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+  </svg>
+</button>
+
+<!-- ── Settings Modal ────────────────────────────────────────────────────────── -->
+<div id="settings-backdrop" style="display:none" onclick="toggleSettings()">
+  <div id="settings-panel" onclick="event.stopPropagation()">
+    <div class="sp-head">
+      <span class="sp-title">Settings</span>
+      <button class="sp-close" onclick="toggleSettings()">✕</button>
+    </div>
+    <div class="sp-label">Color Theme</div>
+    <div class="theme-row">
+      <button class="theme-btn" data-theme="moonlit" onclick="setTheme('moonlit')">
+        <div class="theme-swatch" style="background:linear-gradient(135deg,#0a0e27 0%,#1a1f4d 100%)"></div>
+        Moonlit
+      </button>
+      <button class="theme-btn" data-theme="amber" onclick="setTheme('amber')">
+        <div class="theme-swatch" style="background:linear-gradient(135deg,#160a00 0%,#3c2200 100%)"></div>
+        Amber
+      </button>
+      <button class="theme-btn" data-theme="matcha" onclick="setTheme('matcha')">
+        <div class="theme-swatch" style="background:linear-gradient(135deg,#091408 0%,#1e3a1c 100%)"></div>
+        Matcha
+      </button>
+    </div>
+    <div class="sp-sep"></div>
+    <div class="sp-label">Zoom Level</div>
+    <div class="sp-desc">Scale the entire interface. Useful on high-DPI monitors where the UI appears too small or too large.</div>
+    <div class="zoom-row">
+      <input type="range" id="zoom-slider" min="0.5" max="3" step="0.05" oninput="onZoomSlider(this.value)">
+      <span class="zoom-val" id="zoom-display">1.10×</span>
+    </div>
+    <div class="zoom-presets">
+      <button class="zoom-preset-btn" data-zoom="0.75" onclick="setZoom(0.75)">0.75×</button>
+      <button class="zoom-preset-btn" data-zoom="1"    onclick="setZoom(1)">1.00×</button>
+      <button class="zoom-preset-btn" data-zoom="1.1"  onclick="setZoom(1.1)">1.10×</button>
+      <button class="zoom-preset-btn" data-zoom="1.25" onclick="setZoom(1.25)">1.25×</button>
+      <button class="zoom-preset-btn" data-zoom="1.5"  onclick="setZoom(1.5)">1.50×</button>
+      <button class="zoom-preset-btn" data-zoom="1.75" onclick="setZoom(1.75)">1.75×</button>
+      <button class="zoom-preset-btn" data-zoom="2"    onclick="setZoom(2)">2.00×</button>
+    </div>
+    <div class="sp-sep"></div>
+    <button class="tool-btn" onclick="launchTourFromSettings()"
+            style="width:100%;text-align:center;letter-spacing:.04em">
+      ▶ Launch Walkthrough
+    </button>
+  </div>
+</div>
+
+<!-- ── Position Edit Modal (zoom-immune: outside #app) ───────────────────────── -->
+<div id="edit-backdrop" style="display:none" onclick="closeEditModal()">
+  <div id="edit-panel" onclick="event.stopPropagation()">
+    <div class="ep-head">
+      <div>
+        <div class="ep-label">Edit Position</div>
+        <div class="ep-sym" id="ep-sym-label"></div>
+      </div>
+      <button class="sp-close" onclick="closeEditModal()">✕</button>
+    </div>
+    <div class="ep-grid">
+      <div class="ep-field ep-field-full">
+        <label>Name</label>
+        <input id="ep-name" class="tool-input" placeholder="Company / Fund name">
+      </div>
+      <div class="ep-field">
+        <label>Shares</label>
+        <input id="ep-shares" class="tool-input" type="number" step="any" min="0" placeholder="0.000"
+               onkeydown="if(event.key==='Enter')saveEditModal()">
+      </div>
+      <div class="ep-field">
+        <label>Cost Basis / Share ($)</label>
+        <input id="ep-cost" class="tool-input" type="number" step="any" min="0" placeholder="0.00"
+               onkeydown="if(event.key==='Enter')saveEditModal()">
+      </div>
+      <div class="ep-field ep-field-full">
+        <label>Sector</label>
+        <select id="ep-sector" class="tool-input">
+          <option>Technology</option><option>Financials</option><option>Health Care</option>
+          <option>Consumer Disc.</option><option>Consumer Staples</option><option>Industrials</option>
+          <option>Energy</option><option>Materials</option><option>Utilities</option>
+          <option>Real Estate</option><option>Communication</option><option>Mutual Fund</option>
+          <option>Index Fund</option><option>ETF</option><option>Commodities</option>
+          <option>Defense</option><option>Transportation</option><option>Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="ep-actions">
+      <button class="tool-btn" onclick="closeEditModal()">Cancel</button>
+      <button class="ep-save-btn" id="ep-save-btn" onclick="saveEditModal()">Save Changes</button>
+    </div>
+    <div class="ep-status" id="ep-status"></div>
+  </div>
+</div>
+
 <!-- ── Setup / Onboarding Overlay ──────────────────────────────────────────── -->
 <div id="setup-overlay">
   <div class="setup-wrap">
     <div class="setup-head">
       <div class="setup-title">
         <div class="logo-dot"></div>
-        Portfolio Terminal — Setup
+        Argus — Setup
       </div>
       <div class="setup-sub">Add your holdings to get started. You can edit them anytime from the dashboard.</div>
     </div>
@@ -950,6 +1642,7 @@ input[type=range]::-webkit-slider-thumb{
             <option>ETF</option>
             <option>Commodities</option>
             <option>Defense</option>
+            <option>Transportation</option>
             <option>Other</option>
           </select>
         </div>
@@ -988,6 +1681,43 @@ input[type=range]::-webkit-slider-thumb{
 <div id="loading-overlay">
   <div class="spinner"></div>
   <div class="loading-msg">FETCHING LIVE MARKET DATA<span class="dots"></span></div>
+</div>
+
+<!-- ── First-launch Tour Prompt ───────────────────────────────────────────────── -->
+<div id="tour-prompt" style="display:none">
+  <div id="tour-prompt-card">
+    <div class="tp-logo">
+      <div class="tp-logo-dot"></div>
+      <div class="tp-logo-text">Argus</div>
+    </div>
+    <div class="tc-title" style="font-size:16px">Welcome!</div>
+    <div class="tc-body">Would you like a quick walkthrough of all the features? It only takes a minute.</div>
+    <label class="tp-check-row">
+      <input type="checkbox" id="tour-no-again">
+      Don't show this again
+    </label>
+    <div class="tp-btns">
+      <button class="tool-btn" onclick="dismissTourPrompt()">Maybe later</button>
+      <button class="tc-next-btn" onclick="acceptTourPrompt()">Show me around →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Tour Walkthrough Overlay ──────────────────────────────────────────────── -->
+<div id="tour-overlay" style="display:none">
+  <div id="tour-backdrop"></div>
+  <div id="tour-card">
+    <div class="tc-step" id="tc-step"></div>
+    <div class="tc-title" id="tc-title"></div>
+    <div class="tc-body"  id="tc-body"></div>
+    <div class="tc-btns">
+      <button class="tc-skip" onclick="endTour()">✕ Exit tour</button>
+      <div style="display:flex;gap:8px;pointer-events:all">
+        <button class="tool-btn" id="tc-back-btn" onclick="tourNav(-1)" style="padding:5px 12px">← Back</button>
+        <button class="tc-next-btn" id="tc-next-btn" onclick="tourNav(1)">Next →</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -1046,14 +1776,17 @@ function switchTab(tab) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('panel-' + tab).classList.add('active');
   const btns = document.querySelectorAll('.tab-btn');
-  const tabOrder = ['portfolio','add-calc','earnings','concentration','dip','heatmap','history','news','alerts'];
+  const tabOrder = ['portfolio','trade','add-calc','earnings','concentration','dip','heatmap','history','news','alerts'];
   btns[tabOrder.indexOf(tab)].classList.add('active');
 
   // Lazy render tabs when first visited
+  if (tab === 'portfolio' && _pcSnaps.length)    renderPortfolioChart();
   if (tab === 'earnings'       && portfolioData) renderEarnings(portfolioData.holdings);
   if (tab === 'concentration'  && portfolioData) renderConcentration(portfolioData.holdings);
+  if (tab === 'trade'                          ) initTradePanel();
   if (tab === 'add-calc'                       ) initAddCalc();
   if (tab === 'history'                        ) loadHistory();
+  if (tab === 'heatmap' && !document.getElementById('hm-map').hasChildNodes()) loadHeatmap();
   if (tab === 'news'           && !newsLoaded  ) loadNews(false);
   if (tab === 'alerts'                         ) loadAlertsList();
 }
@@ -1070,7 +1803,9 @@ function sortTable(col) {
 
 // ── Fetch prices ───────────────────────────────────────────────────────────────
 async function fetchPrices() {
-  showOverlay(true);
+  // No full-screen overlay here — that causes a gray flicker over already-rendered
+  // content. The refresh button spinner is sufficient for manual refreshes.
+  // The overlay is only used during initial boot (managed by the boot IIFE).
   setRefreshSpin(true);
   hideError();
 
@@ -1083,6 +1818,7 @@ async function fetchPrices() {
     renderHeader(data.summary);
     renderTable(data.holdings);
     renderCharts(data.holdings);
+    loadPortfolioChart();
 
     // Update any visible side panels
     if (activeTab === 'earnings')       renderEarnings(data.holdings);
@@ -1090,6 +1826,7 @@ async function fetchPrices() {
     initAddCalc();
     checkPriceAlerts(data.holdings);
     startAutoRefresh();
+    loadMarketTicker();   // refresh ticker (5-min server cache keeps this cheap)
 
     const ts = new Date(data.summary.asOf);
     document.getElementById('last-updated').textContent =
@@ -1101,7 +1838,6 @@ async function fetchPrices() {
     renderTable(holdings);
     renderCharts(holdings);
   } finally {
-    showOverlay(false);
     setRefreshSpin(false);
   }
 }
@@ -1144,6 +1880,7 @@ function renderTable(holdings) {
       <td class="price">${have ? fmt$(h.price) : '—'}</td>
       <td class="${clsPN(h.change)}">${have ? fmt$(h.change) : '—'}</td>
       <td class="${clsPN(h.changePct)}">${have ? fmtPct(h.changePct) : '—'}</td>
+      <td class="${have ? clsPN(h.dailyPnL) : 'neutral-val'}">${have ? fmt$(h.dailyPnL, 0) : '—'}</td>
       <td class="price">${fmt$0(h.currentValue)}</td>
       <td>
         <div class="weight-bar-wrap">
@@ -1156,6 +1893,12 @@ function renderTable(holdings) {
         ${have ? `<span style="font-size:10px;opacity:.7"> (${fmtPct(h.totalGainPct)})</span>` : ''}
       </td>
       <td><span class="badge-sector">${escHtml(h.sector)}</span></td>
+      <td><button class="row-edit-btn" onclick="openEditModal('${escHtml(h.symbol)}')" title="Edit position">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+        </svg>
+      </button></td>
     </tr>`;
   }).join('');
 }
@@ -1248,6 +1991,7 @@ function renderSectorBar(holdings) {
     data: { labels: sLabels, datasets: [{ data: sData, backgroundColor: sColors.map(c=>c+'bb'), borderColor: sColors, borderWidth:1, borderRadius:3 }] },
     options: {
       indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      datasets: { bar: { maxBarThickness: 18, barPercentage: 0.75 } },
       plugins: {
         legend: { display: false },
         tooltip: {
@@ -1857,7 +2601,11 @@ function renderSetupList() {
       <td style="text-align:right;font-variant-numeric:tabular-nums">${h.shares.toLocaleString('en-US',{minimumFractionDigits:3,maximumFractionDigits:4})}</td>
       <td style="text-align:right;font-variant-numeric:tabular-nums">${fmt$(h.costBasis)}</td>
       <td style="color:var(--text-2);font-size:11px">${h.sector}</td>
-      <td><button class="su-remove" onclick="suRemove('${h.symbol}')" title="Remove">×</button></td>
+      <td style="display:flex;gap:4px;align-items:center">
+        <button class="su-remove" style="color:var(--blue);font-size:12px;font-family:var(--mono)"
+                onclick="suEdit('${h.symbol}')" title="Edit">✎</button>
+        <button class="su-remove" onclick="suRemove('${h.symbol}')" title="Remove">×</button>
+      </td>
     </tr>`).join('');
 }
 
@@ -1879,6 +2627,81 @@ async function suSave() {
     btn.disabled = false; btn.textContent = 'Launch Dashboard →';
     document.getElementById('su-foot-count').textContent = 'Error: ' + e.message;
     document.getElementById('su-foot-count').style.color = 'var(--red)';
+  }
+}
+
+// ── Prefill setup form from existing entry (setup overlay edit) ───────────────
+function suEdit(symbol) {
+  const h = setupHoldings.find(h => h.symbol === symbol);
+  if (!h) return;
+  document.getElementById('su-symbol').value  = h.symbol;
+  document.getElementById('su-name').value    = h.name;
+  document.getElementById('su-shares').value  = h.shares;
+  document.getElementById('su-cost').value    = h.costBasis;
+  document.getElementById('su-sector').value  = h.sector;
+  document.getElementById('su-lookup-status').textContent = '';
+  // Scroll to the form
+  document.getElementById('su-symbol').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  document.getElementById('su-symbol').focus();
+}
+
+// ── Quick-edit modal (main holdings table) ────────────────────────────────────
+let _editSymbol = null;
+
+function openEditModal(symbol) {
+  const holdings = portfolioData?.holdings;
+  if (!holdings) return;
+  const h = holdings.find(h => h.symbol === symbol);
+  if (!h) return;
+  _editSymbol = symbol;
+  document.getElementById('ep-sym-label').textContent = symbol;
+  document.getElementById('ep-name').value   = h.name      || symbol;
+  document.getElementById('ep-shares').value = h.shares;
+  document.getElementById('ep-cost').value   = h.costBasis;
+  document.getElementById('ep-sector').value = h.sector    || 'Other';
+  document.getElementById('ep-status').textContent = '';
+  document.getElementById('ep-save-btn').disabled  = false;
+  document.getElementById('ep-save-btn').textContent = 'Save Changes';
+  document.getElementById('edit-backdrop').style.display = 'flex';
+  setTimeout(() => document.getElementById('ep-shares').focus(), 80);
+}
+
+function closeEditModal() {
+  document.getElementById('edit-backdrop').style.display = 'none';
+  _editSymbol = null;
+}
+
+async function saveEditModal() {
+  const btn    = document.getElementById('ep-save-btn');
+  const status = document.getElementById('ep-status');
+  const name      = document.getElementById('ep-name').value.trim();
+  const shares    = parseFloat(document.getElementById('ep-shares').value);
+  const costBasis = parseFloat(document.getElementById('ep-cost').value);
+  const sector    = document.getElementById('ep-sector').value;
+
+  if (!shares || shares <= 0) { status.textContent = 'Enter a valid share count.'; return; }
+  if (isNaN(costBasis) || costBasis < 0) { status.textContent = 'Enter a valid cost basis.'; return; }
+
+  btn.disabled = true; btn.textContent = 'Saving…';
+  status.textContent = '';
+  try {
+    const updated = (portfolioData?.holdings || []).map(h =>
+      h.symbol !== _editSymbol
+        ? { symbol: h.symbol, name: h.name, shares: h.shares, costBasis: h.costBasis, sector: h.sector }
+        : { symbol: h.symbol, name: name || h.symbol, shares, costBasis, sector }
+    );
+    const r = await fetch('/api/setup', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ holdings: updated }),
+    });
+    const d = await r.json();
+    if (!r.ok || d.error) throw new Error(d.error);
+    closeEditModal();
+    await fetchPrices();
+  } catch (e) {
+    status.textContent = 'Error: ' + e.message;
+    btn.disabled = false; btn.textContent = 'Save Changes';
   }
 }
 
@@ -2063,6 +2886,303 @@ function renderHistoryChart() {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
+// PORTFOLIO VALUE CHART (Robinhood / Fidelity style)
+// ══════════════════════════════════════════════════════════════════════════════
+let pcPeriod = '3M';
+let pcType   = 'area';
+let portfolioValueChart = null;
+let _pcSnaps = [];
+
+async function loadPortfolioChart() {
+  try {
+    const r = await fetch('/api/snapshots');
+    const { snapshots } = await r.json();
+    _pcSnaps = snapshots || [];
+    renderPortfolioChart();
+  } catch(e) { console.warn('[pc]', e.message); }
+}
+
+function setPcPeriod(p) {
+  pcPeriod = p;
+  document.querySelectorAll('.pc-period-btn').forEach(b => b.classList.toggle('active', b.textContent === p));
+  renderPortfolioChart();
+}
+
+function setPcType(t) {
+  pcType = t;
+  const labels = { area:'AREA', line:'LINE', candle:'CANDLE', bar:'BAR' };
+  document.querySelectorAll('.pc-type-btn').forEach(b => b.classList.toggle('active', b.textContent === labels[t]));
+  renderPortfolioChart();
+}
+
+function _pcFilter(snaps) {
+  if (!snaps.length || pcPeriod === 'ALL') return snaps;
+  const lastDate = new Date(snaps[snaps.length - 1].date);
+  const d = new Date(lastDate);
+  let cutoff;
+  if      (pcPeriod === '1W')  { d.setDate(d.getDate() - 7);          cutoff = d; }
+  else if (pcPeriod === '1M')  { d.setMonth(d.getMonth() - 1);        cutoff = d; }
+  else if (pcPeriod === '3M')  { d.setMonth(d.getMonth() - 3);        cutoff = d; }
+  else if (pcPeriod === '6M')  { d.setMonth(d.getMonth() - 6);        cutoff = d; }
+  else if (pcPeriod === 'YTD') { cutoff = new Date(lastDate.getFullYear(), 0, 1); }
+  else if (pcPeriod === '1Y')  { d.setFullYear(d.getFullYear() - 1);  cutoff = d; }
+  const cutStr = cutoff.toISOString().split('T')[0];
+  return snaps.filter(s => s.date >= cutStr);
+}
+
+function _pcBuildOHLC(snaps) {
+  const n = snaps.length;
+  const bucket = n <= 30 ? 1 : n <= 90 ? 5 : 22;
+  const out = [];
+  for (let i = 0; i < n; i += bucket) {
+    const chunk = snaps.slice(i, i + bucket);
+    const vals  = chunk.map(s => s.totalValue).filter(v => v > 0);
+    if (!vals.length) continue;
+    out.push({
+      date: chunk[Math.floor(chunk.length / 2)].date,
+      o: vals[0], h: Math.max(...vals), l: Math.min(...vals), c: vals[vals.length - 1],
+    });
+  }
+  return out;
+}
+
+function renderPortfolioChart() {
+  const section = document.getElementById('pc-section');
+  const emptyEl = document.getElementById('pc-empty');
+  const wrapEl  = document.getElementById('pc-chart-wrap');
+  const valEl   = document.getElementById('pc-val');
+  const chgEl   = document.getElementById('pc-chg');
+
+  section.style.display = 'block';
+
+  if (!_pcSnaps.length) {
+    emptyEl.style.display = 'block';
+    wrapEl.style.display  = 'none';
+    valEl.textContent = '—'; chgEl.innerHTML = '';
+    return;
+  }
+
+  emptyEl.style.display = 'none';
+  wrapEl.style.display  = 'block';
+
+  const filtered = _pcFilter(_pcSnaps);
+  const vals     = filtered.map(s => s.totalValue);
+  const labels   = filtered.map(s => s.date);
+  const firstVal = vals[0]               || 1;
+  const lastVal  = vals[vals.length - 1] || 0;
+  const change   = lastVal - firstVal;
+  const isUp     = change >= 0;
+  const color    = isUp ? '#98c379' : '#e06c75';
+  const colorDim = isUp ? 'rgba(152,195,121,' : 'rgba(224,108,117,';
+
+  function setDisplay(v) {
+    valEl.textContent = fmt$0(v);
+    const c = v - firstVal, p = (c / firstVal) * 100;
+    chgEl.innerHTML = `<span class="${c>=0?'chg-up':'chg-dn'}">${fmt$(c,0)} (${fmtPct(p)})</span><span class="pc-period-label"> · ${pcPeriod}</span>`;
+  }
+  setDisplay(lastVal);
+
+  const candleCanvas = document.getElementById('pc-candle-canvas');
+  const candleTip    = document.getElementById('pc-candle-tooltip');
+
+  if (pcType === 'candle') {
+    if (portfolioValueChart) { portfolioValueChart.destroy(); portfolioValueChart = null; }
+    document.getElementById('pc-canvas').style.display = 'none';
+    _pcDrawCandles(wrapEl, _pcBuildOHLC(filtered), lastVal, firstVal, setDisplay);
+    return;
+  }
+
+  if (candleCanvas) candleCanvas.style.display = 'none';
+  if (candleTip)    candleTip.style.display    = 'none';
+  const canvas = document.getElementById('pc-canvas');
+  canvas.style.display = '';
+  if (portfolioValueChart) { portfolioValueChart.destroy(); portfolioValueChart = null; }
+
+  const ctx = canvas.getContext('2d');
+
+  const pcPlugin = {
+    id: 'pcHover',
+    afterEvent(chart, args) {
+      const active = chart.getActiveElements();
+      if (args.event.type === 'mousemove' && active.length) {
+        setDisplay(vals[active[0].index]);
+      } else if (args.event.type === 'mouseout') {
+        setDisplay(lastVal);
+      }
+    },
+  };
+
+  let type = 'line';
+  let dataset;
+
+  if (pcType === 'area') {
+    dataset = {
+      data: vals, borderColor: color, borderWidth: 2, fill: true, tension: 0.3,
+      pointRadius: vals.length > 60 ? 0 : 2, pointHoverRadius: 5,
+      pointHoverBackgroundColor: color,
+      backgroundColor(ctx2) {
+        const chart = ctx2.chart;
+        if (!chart.chartArea) return colorDim + '0.15)';
+        const grad = chart.ctx.createLinearGradient(0, chart.chartArea.top, 0, chart.chartArea.bottom);
+        grad.addColorStop(0, colorDim + '0.3)');
+        grad.addColorStop(1, colorDim + '0.02)');
+        return grad;
+      },
+    };
+  } else if (pcType === 'line') {
+    dataset = {
+      data: vals, borderColor: color, borderWidth: 2, fill: false, tension: 0.3,
+      pointRadius: vals.length > 60 ? 0 : 2, pointHoverRadius: 5,
+      pointHoverBackgroundColor: color, backgroundColor: 'transparent',
+    };
+  } else { // bar
+    type = 'bar';
+    dataset = {
+      data: vals,
+      backgroundColor: vals.map((v, i) => i === 0 ? colorDim+'0.55)' : (v >= vals[i-1] ? 'rgba(152,195,121,.55)' : 'rgba(224,108,117,.55)')),
+      borderColor:     vals.map((v, i) => i === 0 ? color             : (v >= vals[i-1] ? '#98c379'              : '#e06c75')),
+      borderWidth: 1, borderRadius: 2,
+    };
+  }
+
+  portfolioValueChart = new Chart(ctx, {
+    type,
+    data: { labels, datasets: [dataset] },
+    plugins: [pcPlugin],
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor:'#162133', borderColor:'rgba(38,80,130,.5)', borderWidth:1,
+          titleColor:'#8fa3bf', bodyColor:'#dde4f0',
+          callbacks: {
+            title: items => items[0]?.label || '',
+            label: c => ` Value: ${fmt$0(c.parsed.y)}  (${fmtPct((c.parsed.y - firstVal) / firstVal * 100)})`,
+          },
+        },
+      },
+      scales: {
+        x: {
+          ticks: { color:'#4a6080', font:{ family:'monospace', size:10 }, maxTicksLimit:8 },
+          grid:  { color:'rgba(38,80,130,.1)' }, border:{ color:'rgba(38,80,130,.3)' },
+        },
+        y: {
+          ticks: { color:'#4a6080', font:{ family:'monospace', size:10 }, callback: v => '$'+(v>=1000?(v/1000).toFixed(0)+'K':v.toFixed(0)) },
+          grid:  { color:'rgba(38,80,130,.1)' }, border:{ color:'rgba(38,80,130,.3)' },
+        },
+      },
+      animation: { duration: 350 },
+    },
+  });
+}
+
+function _pcDrawCandles(wrapEl, ohlc, lastVal, firstVal, setDisplay) {
+  let canvas = document.getElementById('pc-candle-canvas');
+  if (!canvas) {
+    canvas = document.createElement('canvas');
+    canvas.id = 'pc-candle-canvas';
+    canvas.style.cssText = 'width:100%;height:100%;display:block;cursor:crosshair';
+    wrapEl.style.position = 'relative';
+    wrapEl.appendChild(canvas);
+  }
+  canvas.style.display = 'block';
+
+  let tip = document.getElementById('pc-candle-tooltip');
+  if (!tip) {
+    tip = document.createElement('div');
+    tip.id = 'pc-candle-tooltip';
+    tip.style.cssText = 'position:absolute;display:none;background:#162133;border:1px solid rgba(38,80,130,.5);border-radius:3px;padding:7px 10px;font-family:monospace;font-size:11px;color:#dde4f0;pointer-events:none;z-index:10;white-space:nowrap;';
+    wrapEl.appendChild(tip);
+  }
+
+  function draw() {
+    // Multiply by _currentZoom: transform:scale(zoom) magnifies the canvas
+    // visually but doesn't grow its pixel buffer, so we compensate here.
+    const dpr = (window.devicePixelRatio || 1) * _currentZoom;
+    const W = canvas.clientWidth, H = canvas.clientHeight;
+    if (!W || !H) { requestAnimationFrame(draw); return; }
+    canvas.width = W * dpr; canvas.height = H * dpr;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+    ctx.clearRect(0, 0, W, H);
+
+    if (!ohlc.length) return;
+
+    const allV  = ohlc.flatMap(d => [d.o, d.h, d.l, d.c]).filter(Boolean);
+    const minV  = Math.min(...allV) * 0.998;
+    const maxV  = Math.max(...allV) * 1.002;
+    const range = maxV - minV || 1;
+    const pad   = { l:58, r:10, t:14, b:28 };
+    const cW    = W - pad.l - pad.r, cH = H - pad.t - pad.b;
+    const n     = ohlc.length;
+    const slot  = cW / n;
+    const bw    = Math.max(2, Math.min(14, slot * 0.65));
+    const toY   = v => pad.t + cH * (1 - (v - minV) / range);
+    const toX   = i => pad.l + i * slot + slot / 2;
+
+    // Grid lines + Y labels
+    ctx.strokeStyle = 'rgba(38,80,130,.12)'; ctx.lineWidth = 1;
+    for (let i = 0; i <= 5; i++) {
+      const y = pad.t + cH / 5 * i;
+      ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(W - pad.r, y); ctx.stroke();
+      const v = maxV - range / 5 * i;
+      ctx.fillStyle = '#4a6080'; ctx.font = '10px monospace'; ctx.textAlign = 'right';
+      ctx.fillText('$' + (v >= 1000 ? (v/1000).toFixed(0)+'K' : v.toFixed(0)), pad.l - 5, y + 3);
+    }
+
+    // X labels
+    const step = Math.max(1, Math.floor(n / 8));
+    ctx.fillStyle = '#4a6080'; ctx.font = '10px monospace'; ctx.textAlign = 'center';
+    ohlc.forEach((d, i) => {
+      if (i % step === 0 || i === n - 1) ctx.fillText(d.date.slice(5), toX(i), H - pad.b + 14);
+    });
+
+    // Candles
+    ohlc.forEach((d, i) => {
+      const isUp  = d.c >= d.o;
+      const clr   = isUp ? '#98c379' : '#e06c75';
+      const x     = toX(i);
+      const yH    = toY(d.h), yL = toY(d.l);
+      const yTop  = toY(Math.max(d.o, d.c));
+      const bodyH = Math.max(1, toY(Math.min(d.o, d.c)) - yTop);
+      // Wick
+      ctx.strokeStyle = clr; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(x, yH); ctx.lineTo(x, yL); ctx.stroke();
+      // Body
+      ctx.fillStyle = isUp ? clr + 'cc' : clr + '33';
+      ctx.fillRect(x - bw/2, yTop, bw, bodyH);
+      if (!isUp) { ctx.strokeStyle = clr; ctx.strokeRect(x - bw/2, yTop, bw, bodyH); }
+    });
+  }
+  draw();
+
+  canvas.onmousemove = e => {
+    const rect = canvas.getBoundingClientRect();
+    const W    = canvas.clientWidth;
+    const slot = (W - 68) / ohlc.length;
+    const i    = Math.round((e.clientX - rect.left - 58 - slot / 2) / slot);
+    if (i >= 0 && i < ohlc.length) {
+      const d = ohlc[i];
+      setDisplay(d.c);
+      tip.style.display = 'block';
+      tip.innerHTML =
+        `<div style="color:#8fa3bf;margin-bottom:5px">${d.date}</div>` +
+        `<div>O: <span style="color:#abb2bf">${fmt$0(d.o)}</span></div>` +
+        `<div>H: <span style="color:#98c379">${fmt$0(d.h)}</span></div>` +
+        `<div>L: <span style="color:#e06c75">${fmt$0(d.l)}</span></div>` +
+        `<div>C: <span style="color:${d.c>=d.o?'#98c379':'#e06c75'}">${fmt$0(d.c)}</span></div>`;
+      let lx = e.clientX - rect.left + 12;
+      if (lx + 130 > W) lx = e.clientX - rect.left - 142;
+      tip.style.left = lx + 'px';
+      tip.style.top  = Math.max(0, e.clientY - rect.top - 40) + 'px';
+    }
+  };
+  canvas.onmouseleave = () => { tip.style.display = 'none'; setDisplay(lastVal); };
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
 // NEWS FEED
 // ══════════════════════════════════════════════════════════════════════════════
 
@@ -2109,6 +3229,333 @@ function timeAgo(ts) {
 
 function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// BUY / SELL TRADE PANEL
+// ══════════════════════════════════════════════════════════════════════════════
+let _tradeMode   = 'buy';
+let _tradeSymbol = null;
+let _tradeName   = null;   // fetched from lookup for new positions
+
+function initTradePanel() {
+  _renderTradeChips();
+  updateTradePreview();
+}
+
+function setTradeMode(mode) {
+  _tradeMode = mode;
+  const buyBtn  = document.getElementById('trade-mode-buy');
+  const sellBtn = document.getElementById('trade-mode-sell');
+  buyBtn.classList.toggle('active', mode === 'buy');
+  sellBtn.classList.toggle('active', mode === 'sell');
+  // Chip color class driven by parent having .sell-mode
+  const chipsEl = document.getElementById('tr-chips');
+  if (chipsEl) chipsEl.closest('.trade-layout')?.classList.toggle('sell-mode', mode === 'sell');
+  const execBtn = document.getElementById('tr-execute-btn');
+  if (execBtn) execBtn.classList.toggle('sell-btn', mode === 'sell');
+  _renderTradeChips();
+  updateTradePreview();
+}
+
+function _renderTradeChips() {
+  const chips = document.getElementById('tr-chips');
+  if (!chips) return;
+  const holdings = portfolioData?.holdings || [];
+  chips.innerHTML = holdings.length
+    ? holdings.map(h => `
+        <button class="trade-chip ${_tradeSymbol === h.symbol ? 'active' : ''}"
+                onclick="selectTradeChip('${escHtml(h.symbol)}')">
+          ${escHtml(h.symbol)}
+        </button>`).join('')
+    : '<span style="font-size:11px;color:var(--text-3)">No holdings yet</span>';
+}
+
+function selectTradeChip(symbol) {
+  _tradeSymbol = symbol;
+  const h = portfolioData?.holdings?.find(h => h.symbol === symbol);
+  _tradeName = h?.name || symbol;
+  document.getElementById('tr-symbol').value = symbol;
+  if (h?.price != null) document.getElementById('tr-price').value = h.price.toFixed(2);
+  document.getElementById('tr-lookup-status').textContent = '';
+  _renderTradeChips();
+  updateTradePreview();
+}
+
+function onTradeSymbolInput() {
+  const sym = document.getElementById('tr-symbol').value.toUpperCase().trim();
+  _tradeSymbol = sym || null;
+  const h = portfolioData?.holdings?.find(h => h.symbol === sym);
+  _tradeName = h?.name || null;
+  _renderTradeChips();
+  updateTradePreview();
+}
+
+async function tradeLookup() {
+  const sym = document.getElementById('tr-symbol').value.toUpperCase().trim();
+  if (!sym) return;
+  const btn    = document.getElementById('tr-lookup-btn');
+  const status = document.getElementById('tr-lookup-status');
+  btn.disabled = true; btn.textContent = '…';
+  status.textContent = 'Looking up…'; status.style.color = 'var(--text-2)';
+  try {
+    const r = await fetch(`/api/quote/${encodeURIComponent(sym)}`);
+    const d = await r.json();
+    if (!r.ok || d.error) throw new Error(d.error || 'Not found');
+    _tradeName   = d.name || sym;
+    _tradeSymbol = sym;
+    document.getElementById('tr-price').value = d.price.toFixed(2);
+    status.textContent = `${d.name ? d.name + '  ·  ' : ''}${fmt$(d.price)}  ${fmtPct(d.changePct)} today`;
+    status.style.color = d.changePct >= 0 ? 'var(--green)' : 'var(--red)';
+    _renderTradeChips();
+    updateTradePreview();
+  } catch (e) {
+    status.textContent = 'Symbol not found — check the ticker and try again';
+    status.style.color = 'var(--red)';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Lookup';
+  }
+}
+
+function updateTradePreview() {
+  const sym    = (document.getElementById('tr-symbol')?.value || '').toUpperCase().trim();
+  const shares = parseFloat(document.getElementById('tr-shares')?.value) || 0;
+  const price  = parseFloat(document.getElementById('tr-price')?.value)  || 0;
+  const total  = shares * price;
+
+  // Total row
+  const totalRow = document.getElementById('tr-total-row');
+  if (totalRow) {
+    totalRow.style.display = (shares > 0 && price > 0) ? 'block' : 'none';
+    document.getElementById('tr-total').textContent = fmt$(total, 0);
+    document.getElementById('tr-total-label').textContent = _tradeMode === 'buy' ? 'Total Cost' : 'Gross Proceeds';
+  }
+
+  const existing = sym ? portfolioData?.holdings?.find(h => h.symbol === sym) : null;
+  const isNew    = sym && !existing;
+
+  // Show sector picker only when buying a brand-new symbol
+  const newSector = document.getElementById('tr-new-sector');
+  if (newSector) newSector.style.display = (_tradeMode === 'buy' && isNew && sym) ? 'block' : 'none';
+
+  // Execute button
+  const execBtn = document.getElementById('tr-execute-btn');
+  let canExec = sym && shares > 0 && price > 0;
+  if (_tradeMode === 'sell' && canExec) {
+    if (!existing || shares > existing.shares) canExec = false;
+  }
+  if (execBtn) {
+    execBtn.disabled = !canExec;
+    if (canExec) {
+      execBtn.textContent = _tradeMode === 'buy'
+        ? `Buy ${shares % 1 === 0 ? shares : shares.toFixed(3)} shares of ${sym} →`
+        : `Sell ${shares % 1 === 0 ? shares : shares.toFixed(3)} shares of ${sym} →`;
+    } else {
+      execBtn.textContent = _tradeMode === 'buy' ? 'Execute Buy →' : 'Execute Sell →';
+    }
+  }
+
+  // Preview pane
+  const emptyEl   = document.getElementById('tr-preview-empty');
+  const contentEl = document.getElementById('tr-preview-content');
+  if (!emptyEl || !contentEl) return;
+
+  if (!sym || !shares || !price) {
+    emptyEl.style.display = 'block'; contentEl.style.display = 'none'; return;
+  }
+  emptyEl.style.display = 'none'; contentEl.style.display = 'block';
+
+  const fmtShares = s => s.toLocaleString('en-US', { minimumFractionDigits: s % 1 === 0 ? 0 : 3, maximumFractionDigits: 4 });
+
+  if (_tradeMode === 'buy') {
+    let newShares, newCost;
+    if (existing) {
+      newShares = existing.shares + shares;
+      newCost   = (existing.shares * existing.costBasis + shares * price) / newShares;
+    } else {
+      newShares = shares; newCost = price;
+    }
+    contentEl.innerHTML = `
+      ${existing ? `
+      <div class="tr-preview-row">
+        <div class="tr-preview-label">Current Position</div>
+        <div class="tr-preview-val">${fmtShares(existing.shares)} shares</div>
+        <div class="tr-preview-sub">Avg cost ${fmt$(existing.costBasis)} · Total ${fmt$(existing.shares * existing.costBasis, 0)}</div>
+      </div>
+      <div class="tr-arrow">+ ${fmtShares(shares)} shares @ ${fmt$(price)}</div>
+      ` : `
+      <div class="tr-preview-row">
+        <div class="tr-preview-label">New Position</div>
+        <div class="tr-preview-sub" style="color:var(--text-2);margin-top:2px"><span style="color:var(--blue);font-weight:600">${escHtml(sym)}</span> will be added to your portfolio</div>
+      </div>
+      <div class="tr-arrow">+ ${fmtShares(shares)} shares @ ${fmt$(price)}</div>
+      `}
+      <div class="tr-preview-after buy">
+        <div class="tr-preview-label" style="color:var(--green)">After Purchase</div>
+        <div class="tr-preview-val">${fmtShares(newShares)} shares</div>
+        <div class="tr-preview-sub">
+          New avg cost ${fmt$(newCost)}
+          ${existing ? ` · was ${fmt$(existing.costBasis)}` : ''}
+          · Total invested ${fmt$(newShares * newCost, 0)}
+        </div>
+      </div>`;
+  } else {
+    // SELL
+    if (!existing) {
+      contentEl.innerHTML = `<div style="color:var(--red);font-size:11px;padding-top:4px">You don't hold <strong>${escHtml(sym)}</strong>.</div>`;
+      return;
+    }
+    if (shares > existing.shares) {
+      contentEl.innerHTML = `<div style="color:var(--red);font-size:11px;padding-top:4px">Cannot sell more than <strong>${fmtShares(existing.shares)}</strong> shares held.</div>`;
+      return;
+    }
+    const remaining = existing.shares - shares;
+    const isClosed  = remaining === 0;
+    const gainLoss  = (price - existing.costBasis) * shares;
+    contentEl.innerHTML = `
+      <div class="tr-preview-row">
+        <div class="tr-preview-label">Current Position</div>
+        <div class="tr-preview-val">${fmtShares(existing.shares)} shares</div>
+        <div class="tr-preview-sub">Avg cost ${fmt$(existing.costBasis)}</div>
+      </div>
+      <div class="tr-arrow">− ${fmtShares(shares)} shares sold @ ${fmt$(price)}</div>
+      <div class="tr-preview-row">
+        <div class="tr-preview-label">Realized Gain/Loss</div>
+        <div class="tr-preview-val ${gainLoss >= 0 ? 'chg-up' : 'chg-dn'}">${gainLoss >= 0 ? '+' : ''}${fmt$(gainLoss, 0)}</div>
+        <div class="tr-preview-sub">${fmtPct((price / existing.costBasis - 1) * 100)} vs avg cost</div>
+      </div>
+      <div class="tr-preview-after ${isClosed ? 'close' : 'sell'}">
+        <div class="tr-preview-label" style="color:${isClosed ? 'var(--red)' : 'var(--blue)'}">
+          ${isClosed ? 'Position Closed' : 'After Sale'}
+        </div>
+        ${isClosed
+          ? `<div class="tr-preview-val">0 shares</div>
+             <div class="tr-preview-sub">${escHtml(sym)} will be removed from your portfolio</div>`
+          : `<div class="tr-preview-val">${fmtShares(remaining)} shares remain</div>
+             <div class="tr-preview-sub">Avg cost unchanged at ${fmt$(existing.costBasis)}</div>`
+        }
+      </div>`;
+  }
+}
+
+async function executeTrade() {
+  const sym    = document.getElementById('tr-symbol').value.toUpperCase().trim();
+  const shares = parseFloat(document.getElementById('tr-shares').value);
+  const price  = parseFloat(document.getElementById('tr-price').value);
+  const sector = document.getElementById('tr-sector')?.value || 'Other';
+  const status = document.getElementById('tr-status');
+  const btn    = document.getElementById('tr-execute-btn');
+  if (!sym || !shares || !price) return;
+
+  btn.disabled = true; btn.textContent = 'Processing…'; status.textContent = '';
+
+  try {
+    const current  = portfolioData?.holdings || [];
+    const existing = current.find(h => h.symbol === sym);
+    let updated;
+
+    if (_tradeMode === 'buy') {
+      if (existing) {
+        const newShares = existing.shares + shares;
+        const newCost   = (existing.shares * existing.costBasis + shares * price) / newShares;
+        updated = current.map(h =>
+          h.symbol === sym
+            ? { symbol: h.symbol, name: h.name, shares: newShares, costBasis: parseFloat(newCost.toFixed(6)), sector: h.sector }
+            : { symbol: h.symbol, name: h.name, shares: h.shares, costBasis: h.costBasis, sector: h.sector }
+        );
+      } else {
+        updated = [
+          ...current.map(h => ({ symbol: h.symbol, name: h.name, shares: h.shares, costBasis: h.costBasis, sector: h.sector })),
+          { symbol: sym, name: _tradeName || sym, shares, costBasis: price, sector },
+        ];
+      }
+    } else {
+      if (!existing) throw new Error(`You don't hold ${sym}`);
+      if (shares > existing.shares) throw new Error(`Cannot sell more than ${existing.shares} shares`);
+      const remaining = existing.shares - shares;
+      updated = remaining === 0
+        ? current.filter(h => h.symbol !== sym).map(h => ({ symbol: h.symbol, name: h.name, shares: h.shares, costBasis: h.costBasis, sector: h.sector }))
+        : current.map(h =>
+            h.symbol === sym
+              ? { symbol: h.symbol, name: h.name, shares: remaining, costBasis: h.costBasis, sector: h.sector }
+              : { symbol: h.symbol, name: h.name, shares: h.shares, costBasis: h.costBasis, sector: h.sector }
+          );
+    }
+
+    const r = await fetch('/api/setup', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ holdings: updated }),
+    });
+    const d = await r.json();
+    if (!r.ok || d.error) throw new Error(d.error);
+
+    // Clear inputs
+    document.getElementById('tr-symbol').value = '';
+    document.getElementById('tr-shares').value = '';
+    document.getElementById('tr-price').value  = '';
+    document.getElementById('tr-lookup-status').textContent = '';
+    _tradeSymbol = null; _tradeName = null;
+
+    status.textContent = _tradeMode === 'buy'
+      ? `✓ Bought ${shares} ${shares === 1 ? 'share' : 'shares'} of ${sym} @ ${fmt$(price)}`
+      : `✓ Sold ${shares} ${shares === 1 ? 'share' : 'shares'} of ${sym}`;
+    status.style.color = 'var(--green)';
+
+    await fetchPrices();
+    _renderTradeChips();
+    updateTradePreview();
+  } catch (e) {
+    status.textContent = 'Error: ' + e.message;
+    status.style.color = 'var(--red)';
+    btn.disabled = false;
+    btn.textContent = _tradeMode === 'buy' ? 'Execute Buy →' : 'Execute Sell →';
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// MARKET TICKER BAR
+// ══════════════════════════════════════════════════════════════════════════════
+async function loadMarketTicker() {
+  try {
+    const r = await fetch('/api/market-overview');
+    const { items, asOf, error } = await r.json();
+    if (error) throw new Error(error);
+
+    const wrap = document.getElementById('mt-items');
+    if (!wrap) return;
+
+    wrap.innerHTML = items.map(it => {
+      const up  = (it.change ?? 0) >= 0;
+      const cls = it.change == null ? 'flat' : up ? 'up' : 'dn';
+      const arr = it.change == null ? '' : up ? '▲' : '▼';
+
+      const price = it.price == null ? '—'
+        : it.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+      const chgStr = it.change == null ? '—'
+        : (up ? '+' : '') + it.change.toFixed(2)
+          + '  ' + (up ? '+' : '') + it.changePct.toFixed(2) + '%';
+
+      return `<div class="mt-item">
+        <div class="mt-name">${escHtml(it.label)}</div>
+        <div class="mt-price">${price} <span class="mt-chg ${cls}" style="font-size:9px">${arr}</span></div>
+        <div class="mt-chg ${cls}">${chgStr}</div>
+      </div>`;
+    }).join('');
+
+    const asofEl = document.getElementById('mt-asof');
+    if (asofEl && asOf) {
+      asofEl.textContent = new Date(asOf).toLocaleTimeString('en-US',
+        { hour: '2-digit', minute: '2-digit' });
+    }
+  } catch (e) {
+    console.warn('[market-ticker]', e.message);
+  }
+}
+
+function mtScroll(dx) {
+  const el = document.getElementById('mt-scroll-wrap');
+  if (el) el.scrollBy({ left: dx, behavior: 'smooth' });
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -2296,6 +3743,89 @@ if (window.electronAPI) {
   });
 }
 
+// ══════════════════════════════════════════════════════════════════════════════
+// THEME
+// ══════════════════════════════════════════════════════════════════════════════
+const THEME_KEY     = 'argus-theme';
+const THEME_DEFAULT = 'moonlit';
+
+function initTheme() {
+  const saved = localStorage.getItem(THEME_KEY) || THEME_DEFAULT;
+  _applyTheme(saved, false);
+}
+
+function _applyTheme(name, save = true) {
+  const valid = ['moonlit', 'amber', 'matcha'];
+  if (!valid.includes(name)) name = THEME_DEFAULT;
+  if (name === 'moonlit') {
+    document.documentElement.removeAttribute('data-theme');
+  } else {
+    document.documentElement.setAttribute('data-theme', name);
+  }
+  if (save) localStorage.setItem(THEME_KEY, name);
+  document.querySelectorAll('.theme-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.theme === name);
+  });
+}
+
+function setTheme(name) { _applyTheme(name); }
+
+// ══════════════════════════════════════════════════════════════════════════════
+// ZOOM / DISPLAY SETTINGS
+// ══════════════════════════════════════════════════════════════════════════════
+const ZOOM_KEY     = 'argus-zoom';
+const ZOOM_DEFAULT = 1.1;
+let _currentZoom   = ZOOM_DEFAULT;   // tracked so canvas draws can read it
+
+function initZoom() {
+  const saved = parseFloat(localStorage.getItem(ZOOM_KEY)) || ZOOM_DEFAULT;
+  _applyZoom(saved, false);
+}
+
+function _applyZoom(factor, save = true) {
+  factor = Math.max(0.5, Math.min(3.0, parseFloat(parseFloat(factor).toFixed(2))));
+  _currentZoom = factor;
+
+  // Scale #app only — gear button & modal live outside #app and stay fixed-size
+  const appEl = document.getElementById('app');
+  if (appEl) {
+    appEl.style.width     = (100 / factor) + 'vw';
+    appEl.style.height    = (100 / factor) + 'vh';
+    appEl.style.transform = 'scale(' + factor + ')';
+  }
+  if (save) localStorage.setItem(ZOOM_KEY, factor);
+  const slider  = document.getElementById('zoom-slider');
+  const display = document.getElementById('zoom-display');
+  if (slider)  slider.value = factor;
+  if (display) display.textContent = factor.toFixed(2) + '×';
+  document.querySelectorAll('.zoom-preset-btn').forEach(b => {
+    b.classList.toggle('active', Math.abs(parseFloat(b.dataset.zoom) - factor) < 0.01);
+  });
+
+  // Set Chart.js global DPR now (synchronous) so any charts created later in
+  // this same tick (e.g. at boot) already use the correct resolution.
+  // transform:scale(N) makes canvases appear N× larger without growing their
+  // pixel buffer, so we compensate by scaling devicePixelRatio by zoom.
+  Chart.defaults.devicePixelRatio = window.devicePixelRatio * factor;
+
+  // Resize existing live charts after layout settles (needs rAF so that the
+  // new #app dimensions are committed before Chart.js reads clientWidth).
+  requestAnimationFrame(() => {
+    [allocChart, sectorChart, historyChart, portfolioValueChart].forEach(c => {
+      if (c) c.resize();
+    });
+    // Custom candle canvas re-draws itself using the updated _currentZoom dpr
+    if (pcType === 'candle' && _pcSnaps.length) renderPortfolioChart();
+  });
+}
+
+function setZoom(factor)      { _applyZoom(parseFloat(factor)); }
+function onZoomSlider(val)    { _applyZoom(parseFloat(val)); }
+function toggleSettings() {
+  const bd = document.getElementById('settings-backdrop');
+  bd.style.display = bd.style.display === 'none' ? 'flex' : 'none';
+}
+
 // ── Boot ───────────────────────────────────────────────────────────────────────
 async function bootDashboard() {
   // Load static holdings for instant render
@@ -2307,6 +3837,7 @@ async function bootDashboard() {
   renderWatchlistTags();
   renderTable(holdings);
   renderCharts(holdings);
+  loadPortfolioChart();
 
   // Request notification permission early (for price alerts)
   if ('Notification' in window && Notification.permission === 'default') {
@@ -2315,9 +3846,186 @@ async function bootDashboard() {
 
   // Fetch live prices (will start auto-refresh on completion)
   await fetchPrices();
+
+  // Load market overview ticker (fire-and-forget, 5-min server cache)
+  loadMarketTicker();
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// WALKTHROUGH TOUR
+// ══════════════════════════════════════════════════════════════════════════════
+const TOUR_KEY = 'argus-tour-seen';
+
+const TOUR_STEPS = [
+  { title:'Welcome to Argus', tab:null, target:null,
+    body:'This quick tour covers every feature. Use Next and Back to navigate, or click "Exit tour" to close it at any time.' },
+  { title:'Header Bar', tab:null, target:'#header',
+    body:'Shows live portfolio stats — total value, today\'s dollar gain/loss, and overall return. The Refresh button fetches the latest prices, and the app auto-refreshes every 60 seconds.' },
+  { title:'Holdings Table', tab:'portfolio', target:'.table-wrap',
+    body:'Every position with live price, daily change, P&L, current value, portfolio weight, and total gain/loss. Click any column header to sort. Hover a row and click the pencil icon to edit that position.' },
+  { title:'Allocation & Sector Charts', tab:'portfolio', target:'.charts-row',
+    body:'The donut chart shows allocation by stock or sector — toggle with the By Stock / By Sector buttons. The bar chart shows sector exposure. Both update on every refresh.' },
+  { title:'Market Ticker', tab:'portfolio', target:'#market-ticker',
+    body:'Real-time quotes for S&P 500 Futures, Dow, Nasdaq, Russell 2000, VIX, Gold, Bitcoin, and Crude Oil. Use the ‹ › arrows to scroll. Updates on every refresh.' },
+  { title:'Buy / Sell Tab', tab:'trade', target:'#panel-trade',
+    body:'Execute trades and update your portfolio automatically. Buying recalculates your average cost basis. Selling reduces your share count — if you sell all shares, the position is removed. Click a chip to pre-fill from an existing holding.' },
+  { title:'Add Calculator', tab:'add-calc', target:'#panel-add-calc',
+    body:'Model a potential purchase before committing. Enter a dollar amount to see what your new average cost, share count, and portfolio weight would be — without actually making the trade.' },
+  { title:'Earnings Calendar', tab:'earnings', target:'#panel-earnings',
+    body:'Upcoming earnings dates for all your holdings with a live countdown. Color-coded by urgency: green (far out), yellow (this week), red (imminent or today).' },
+  { title:'Concentration Monitor', tab:'concentration', target:'#panel-concentration',
+    body:'Set a weight threshold and this tab flags any position that exceeds it — useful for managing position sizing and staying diversified.' },
+  { title:'Dip Alert Screener', tab:'dip', target:'#panel-dip',
+    body:'Build a custom watchlist and scan for dip-buying opportunities using RSI and distance-from-moving-average signals. Helps surface potentially oversold stocks.' },
+  { title:'Market Heatmap', tab:'heatmap', target:'#panel-heatmap',
+    body:'A sector-by-sector view of today\'s S&P 500 movers across 11 sectors. Green tiles are up, red are down. The heatmap loads automatically when you open this tab.' },
+  { title:'Portfolio History', tab:'history', target:'#panel-history',
+    body:'Tracks your total portfolio value over time. A daily snapshot is saved every time you refresh prices. View as area, line, candlestick, or bar — with optional SPY/QQQ benchmark overlays.' },
+  { title:'News Feed', tab:'news', target:'#panel-news',
+    body:'Latest financial headlines for your holdings pulled from Yahoo Finance. Updates every 5 minutes. Click any card to open the full article in your browser.' },
+  { title:'Price Alerts', tab:'alerts', target:'#panel-alerts',
+    body:'Set a price target for any ticker. Argus sends a desktop notification when the price crosses your target — above or below.' },
+  { title:'Settings', tab:null, target:'#settings-gear',
+    body:'Click the ⚙ gear in the bottom-right corner anytime to change the color theme (Moonlit, Amber, Macha), adjust the zoom level for your monitor, or relaunch this tour.' },
+  { title:'You\'re all set!', tab:'portfolio', target:null,
+    body:'That\'s the full tour of Argus. You can relaunch this walkthrough anytime from the Settings panel. Enjoy!' },
+];
+
+let _tourStep = 0;
+
+function checkTourPrompt() {
+  if (!localStorage.getItem(TOUR_KEY)) {
+    document.getElementById('tour-prompt').style.display = 'flex';
+  }
+}
+
+function dismissTourPrompt() {
+  if (document.getElementById('tour-no-again').checked)
+    localStorage.setItem(TOUR_KEY, '1');
+  document.getElementById('tour-prompt').style.display = 'none';
+}
+
+function acceptTourPrompt() {
+  if (document.getElementById('tour-no-again').checked)
+    localStorage.setItem(TOUR_KEY, '1');
+  document.getElementById('tour-prompt').style.display = 'none';
+  startTour();
+}
+
+function startTour() {
+  _tourStep = 0;
+  document.getElementById('settings-backdrop').style.display = 'none';
+  document.getElementById('tour-overlay').style.display = 'block';
+  renderTourStep();
+}
+
+function launchTourFromSettings() {
+  document.getElementById('settings-backdrop').style.display = 'none';
+  startTour();
+}
+
+function endTour() {
+  document.getElementById('tour-overlay').style.display = 'none';
+  document.querySelectorAll('.tour-highlight').forEach(el => el.classList.remove('tour-highlight'));
+}
+
+function tourNav(dir) {
+  const next = _tourStep + dir;
+  if (next < 0 || next >= TOUR_STEPS.length) return;
+  _tourStep = next;
+  renderTourStep();
+}
+
+function renderTourStep() {
+  const step   = TOUR_STEPS[_tourStep];
+  const isLast = _tourStep === TOUR_STEPS.length - 1;
+
+  // Remove old highlight
+  document.querySelectorAll('.tour-highlight').forEach(el => el.classList.remove('tour-highlight'));
+
+  // Switch tab and scroll to top
+  if (step.tab) {
+    switchTab(step.tab);
+    const mc = document.getElementById('main-col');
+    if (mc) mc.scrollTop = 0;
+  }
+
+  // Update card text
+  document.getElementById('tc-step').textContent  = `Step ${_tourStep + 1} of ${TOUR_STEPS.length}`;
+  document.getElementById('tc-title').textContent = step.title;
+  document.getElementById('tc-body').textContent  = step.body;
+  document.getElementById('tc-back-btn').style.visibility = _tourStep === 0 ? 'hidden' : 'visible';
+  const nextBtn = document.getElementById('tc-next-btn');
+  nextBtn.textContent = isLast ? 'Done ✓' : 'Next →';
+  nextBtn.onclick = isLast ? endTour : () => tourNav(1);
+
+  // After tab renders, highlight target and position card.
+  // Use 'instant' scroll so getBoundingClientRect() is correct immediately —
+  // smooth scroll is async and the card would get positioned mid-animation.
+  const delay = step.tab ? 260 : 40;
+  setTimeout(() => {
+    let targetEl = null;
+    if (step.target) {
+      targetEl = document.querySelector(step.target);
+      if (targetEl) {
+        targetEl.classList.add('tour-highlight');
+        // 'center' puts the element mid-viewport, giving room for the card
+        // above or below. 'instant' means layout is settled before we measure.
+        targetEl.scrollIntoView({ behavior: 'instant', block: 'center' });
+      }
+    }
+    positionTourCard(targetEl);
+  }, delay);
+}
+
+function positionTourCard(targetEl) {
+  const card  = document.getElementById('tour-card');
+  const cardW = 340;
+  const gap   = 16;
+
+  if (!targetEl) {
+    card.style.top       = '50%';
+    card.style.left      = '50%';
+    card.style.transform = 'translate(-50%,-50%)';
+    return;
+  }
+
+  card.style.transform = '';
+  const rect  = targetEl.getBoundingClientRect();
+  const cardH = card.offsetHeight || 220;
+  const winW  = window.innerWidth;
+  const winH  = window.innerHeight;
+
+  // Decide: put card below if element is in the upper half, above if lower half.
+  // This avoids the card chasing a centered element off the edge.
+  const elMidY  = rect.top + rect.height / 2;
+  const inLower = elMidY > winH / 2;
+
+  let top;
+  if (!inLower) {
+    // Element in upper half — card goes below
+    top = rect.bottom + gap;
+    if (top + cardH > winH - gap) top = rect.top - cardH - gap; // fallback: above
+  } else {
+    // Element in lower half — card goes above
+    top = rect.top - cardH - gap;
+    if (top < gap) top = rect.bottom + gap; // fallback: below
+  }
+  // Last resort: clamp into viewport
+  top = Math.max(gap, Math.min(top, winH - cardH - gap));
+
+  // Horizontally center under/over the element, clamped to viewport
+  let left = rect.left + rect.width / 2 - cardW / 2;
+  left = Math.max(gap, Math.min(left, winW - cardW - gap));
+
+  card.style.top  = top  + 'px';
+  card.style.left = left + 'px';
 }
 
 (async () => {
+  initTheme();
+  initZoom();
+
   // Check if portfolio has been configured
   const sr = await fetch('/api/setup-status');
   const { configured } = await sr.json();
@@ -2329,6 +4037,8 @@ async function bootDashboard() {
     // Skip setup, go straight to dashboard
     document.getElementById('setup-overlay').classList.add('hidden');
     await bootDashboard();
+    showOverlay(false);   // hide initial boot overlay now that data is ready
+    setTimeout(checkTourPrompt, 600); // show first-launch prompt after UI settles
   }
 })();
 </script>

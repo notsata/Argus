@@ -6,10 +6,10 @@ const fs      = require('fs');
 const crypto  = require('crypto');
 
 // ── Encryption helpers (AES-256-GCM) ─────────────────────────────────────────
-// Key is set by electron-main.js via PORTFOLIO_CRYPTO_KEY (64 hex chars = 32 bytes).
+// Key is set by electron-main.js via ARGUS_CRYPTO_KEY (64 hex chars = 32 bytes).
 // Falls back to plain JSON when the key isn't present (dev/non-Electron runs).
 function _getKey() {
-  const hex = process.env.PORTFOLIO_CRYPTO_KEY || '';
+  const hex = process.env.ARGUS_CRYPTO_KEY || '';
   const buf = Buffer.from(hex, 'hex');
   return buf.length === 32 ? buf : null;
 }
@@ -48,11 +48,11 @@ function decryptJSON(raw) {
 
 // ── Data directory ────────────────────────────────────────────────────────────
 const isPkg    = typeof process.pkg !== 'undefined';
-const DATA_DIR = process.env.PORTFOLIO_DATA_DIR ||
+const DATA_DIR = process.env.ARGUS_DATA_DIR ||
                  (isPkg ? path.dirname(process.execPath) : __dirname);
-const HOLDINGS_FILE  = path.join(DATA_DIR, 'portfolio-holdings.json');
-const SNAPSHOTS_FILE = path.join(DATA_DIR, 'portfolio-snapshots.json');
-const ALERTS_FILE    = path.join(DATA_DIR, 'portfolio-alerts.json');
+const HOLDINGS_FILE  = path.join(DATA_DIR, 'argus-holdings.json');
+const SNAPSHOTS_FILE = path.join(DATA_DIR, 'argus-snapshots.json');
+const ALERTS_FILE    = path.join(DATA_DIR, 'argus-alerts.json');
 
 // ── Holdings ──────────────────────────────────────────────────────────────────
 function loadHoldings() {
@@ -432,10 +432,46 @@ app.get('/api/benchmark', async (_req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// ── Market Overview ticker ────────────────────────────────────────────────────
+const MARKET_SYMBOLS = [
+  { sym: 'ES=F',    label: 'S&P Futures'       },
+  { sym: 'YM=F',    label: 'Dow Futures'        },
+  { sym: 'NQ=F',    label: 'Nasdaq Futures'     },
+  { sym: 'RTY=F',   label: 'Russell 2000 Futures'},
+  { sym: '^VIX',    label: 'VIX'               },
+  { sym: 'GC=F',    label: 'Gold'              },
+  { sym: 'BTC-USD', label: 'Bitcoin USD'       },
+  { sym: 'CL=F',    label: 'Crude Oil'         },
+];
+let _marketCache = null;
+let _marketCacheTs = 0;
+
+app.get('/api/market-overview', async (_req, res) => {
+  if (_marketCache && (Date.now() - _marketCacheTs) < 5 * 60 * 1000)
+    return res.json(_marketCache);
+  try {
+    const syms   = MARKET_SYMBOLS.map(m => m.sym);
+    const quotes = await fetchYahooQuotes(syms);
+    const bySymbol = Object.fromEntries(quotes.map(q => [q.symbol, q]));
+    const items = MARKET_SYMBOLS.map(({ sym, label }) => {
+      const q = bySymbol[sym];
+      return {
+        sym, label,
+        price:     q?.regularMarketPrice             ?? null,
+        change:    q?.regularMarketChange            ?? null,
+        changePct: q?.regularMarketChangePercent     ?? null,
+      };
+    });
+    const payload = { items, asOf: new Date().toISOString() };
+    _marketCache = payload; _marketCacheTs = Date.now();
+    res.json(payload);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 // ── Start ─────────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-  console.log(`\n  Portfolio Terminal  →  http://localhost:${PORT}`);
+  console.log(`\n  Argus  →  http://localhost:${PORT}`);
   console.log(`  Holdings file      →  ${HOLDINGS_FILE}`);
   console.log(`  Holdings loaded    →  ${HOLDINGS.length} positions\n`);
 });

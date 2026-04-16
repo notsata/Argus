@@ -9,15 +9,15 @@ const crypto = require('crypto');
 let mainWindow = null;
 
 app.whenReady().then(async () => {
-  // Tell server.js where to store portfolio-holdings.json (Electron userData folder)
+  // Tell server.js where to store argus-holdings.json (Electron userData folder)
   const userData = app.getPath('userData');
-  process.env.PORTFOLIO_DATA_DIR = userData;
+  process.env.ARGUS_DATA_DIR = userData;
 
   // ── Encryption key setup (Windows DPAPI via safeStorage) ──────────────────
   // Generate a random 256-bit key once; store it encrypted with DPAPI so only
-  // this Windows user account can decrypt portfolio data files.
+  // this Windows user account can decrypt Argus data files.
   if (safeStorage.isEncryptionAvailable()) {
-    const keyFile = path.join(userData, '.portfolio-key');
+    const keyFile = path.join(userData, '.argus-key');
     let hexKey;
     if (fs.existsSync(keyFile)) {
       const encryptedKey = fs.readFileSync(keyFile);
@@ -26,7 +26,7 @@ app.whenReady().then(async () => {
       hexKey = crypto.randomBytes(32).toString('hex');
       fs.writeFileSync(keyFile, safeStorage.encryptString(hexKey));
     }
-    process.env.PORTFOLIO_CRYPTO_KEY = hexKey;
+    process.env.ARGUS_CRYPTO_KEY = hexKey;
   }
   // If safeStorage isn't available, server.js falls back to plain JSON.
 
@@ -45,7 +45,7 @@ function createWindow() {
     height:    920,
     minWidth:  1000,
     minHeight: 650,
-    title:     'Portfolio Terminal',
+    title:     'Argus',
     backgroundColor: '#21252b',
     show: false,
     autoHideMenuBar: true,
