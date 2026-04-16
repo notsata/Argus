@@ -1,6 +1,6 @@
 {
   "name": "argus",
-  "version": "1.0.1",
+  "version": "1.1.1",
   "description": "Argus — live portfolio tracking dashboard",
   "main": "electron-main.js",
   "scripts": {
@@ -12,9 +12,9 @@
     "publish": "electron-builder --win nsis --publish always"
   },
   "build": {
-    "appId": "com.portfolio.terminal",
-    "productName": "Portfolio Terminal",
-    "copyright": "Portfolio Terminal",
+    "appId": "com.argus.portfolio",
+    "productName": "Argus",
+    "copyright": "Argus",
     "directories": {
       "output": "dist-electron"
     },
@@ -55,10 +55,10 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "artifactName": "PortfolioTerminal-Setup-${version}.exe"
+      "artifactName": "Argus Installer ${version}.exe"
     },
     "portable": {
-      "artifactName": "PortfolioTerminal-portable.exe"
+      "artifactName": "Argus Portable.exe"
     }
   },
   "pkg": {
