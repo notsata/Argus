@@ -322,7 +322,7 @@ html,body{height:100%;background:var(--body-bg);color:var(--text);font-family:va
 .tab-panel.active{display:block}
 
 /* ── Table ─────────────────────────────────────────────────────────────────── */
-.table-wrap{border:1px solid var(--border);border-radius:4px;overflow:hidden;margin-bottom:16px}
+.table-wrap{border:1px solid var(--border);border-radius:4px;overflow:hidden;margin-bottom:6px}
 table{width:100%;border-collapse:collapse}
 thead{background:var(--bg2);position:sticky;top:0;z-index:5}
 th{
@@ -381,9 +381,20 @@ tbody tr:hover .row-flag.flag-none{border-color:var(--border2) transparent trans
 /* ── Charts Row ────────────────────────────────────────────────────────────── */
 /* Fixed row height keeps both cards equal and prevents sector chart overflow   */
 .charts-row{
-  display:grid;grid-template-columns:minmax(180px,290px) 1fr;
-  gap:14px;margin-bottom:16px;height:270px;
+  display:flex;flex-direction:row;align-items:stretch;
+  gap:0;margin-bottom:16px;height:270px;
 }
+.charts-row>.chart-card:first-child{width:290px;flex-shrink:0}
+.charts-row>.chart-card:last-child{flex:1;min-width:100px}
+/* ── Resize handles ─────────────────────────────────────────────────────── */
+.rh{height:10px;cursor:ns-resize;position:relative;z-index:10;user-select:none;border-radius:3px;flex-shrink:0}
+.rh::after{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:48px;height:3px;border-radius:2px;background:var(--border2);opacity:0;transition:opacity .15s}
+.rh:hover::after,.rh.rh-active::after{opacity:1;background:var(--blue)}
+.rh-h{width:14px;align-self:stretch;cursor:ew-resize;flex-shrink:0;position:relative;z-index:10;user-select:none;border-radius:3px}
+.rh-h::after{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:3px;height:36px;border-radius:2px;background:var(--border2);opacity:0;transition:opacity .15s}
+.rh-h:hover::after,.rh-h.rh-active::after{opacity:1;background:var(--blue)}
+body.rh-drag-v{cursor:ns-resize!important;user-select:none!important}
+body.rh-drag-h{cursor:ew-resize!important;user-select:none!important}
 .chart-card{
   border:1px solid var(--border);border-radius:4px;
   padding:16px;
@@ -938,7 +949,7 @@ tbody tr:hover .row-edit-btn{opacity:1}
 .mt-scroll-btn:hover{color:var(--text)}
 
 /* ── Portfolio Value Chart (Robinhood / Fidelity style) ─────────────────────── */
-.pc-section{border:1px solid var(--border);border-radius:4px;padding:18px 18px 12px;margin-bottom:16px}
+.pc-section{border:1px solid var(--border);border-radius:4px;padding:18px 18px 12px;margin-bottom:6px;overflow:hidden}
 .pc-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px}
 .pc-big-val{font-size:26px;font-weight:600;color:var(--text);font-variant-numeric:tabular-nums;line-height:1.1}
 .pc-change-row{font-size:12px;margin-top:4px}
@@ -1184,6 +1195,7 @@ tbody tr:hover .row-edit-btn{opacity:1}
         </div>
       </div>
 
+      <div class="rh" id="rh-chart" title="Drag to resize chart height"></div>
       <div class="table-wrap">
         <table id="holdings-table">
           <thead>
@@ -1206,6 +1218,7 @@ tbody tr:hover .row-edit-btn{opacity:1}
           </tbody>
         </table>
       </div>
+      <div class="rh" id="rh-table" title="Drag to resize holdings table height"></div>
       <div class="charts-row">
         <div class="chart-card">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
@@ -1224,6 +1237,7 @@ tbody tr:hover .row-edit-btn{opacity:1}
           </div>
           <div class="legend-grid" id="alloc-legend"></div>
         </div>
+        <div class="rh rh-h" id="rh-alloc" title="Drag to resize column width"></div>
         <div class="chart-card">
           <div class="chart-title">Sector Exposure</div>
           <div class="sector-wrap">
@@ -1730,6 +1744,10 @@ tbody tr:hover .row-edit-btn{opacity:1}
         <input id="ep-cost" class="tool-input" type="number" step="any" min="0" placeholder="0.00"
                onkeydown="if(event.key==='Enter')saveEditModal()">
       </div>
+      <div class="ep-field">
+        <label>Purchase Date <span style="font-size:9px;color:var(--text-3)">(fixes chart history)</span></label>
+        <input id="ep-purchase-date" class="tool-input" type="date">
+      </div>
       <div class="ep-field ep-field-full">
         <label>Sector</label>
         <select id="ep-sector" class="tool-input">
@@ -1803,6 +1821,10 @@ tbody tr:hover .row-edit-btn{opacity:1}
         <div class="setup-field">
           <label>Cost Basis / Share ($)</label>
           <input id="su-cost" class="tool-input" type="number" placeholder="0.00" step="any" min="0">
+        </div>
+        <div class="setup-field">
+          <label>Purchase Date</label>
+          <input id="su-purchase-date" class="tool-input" type="date">
         </div>
         <div class="setup-field">
           <label>Sector</label>
@@ -2096,7 +2118,9 @@ async function fetchPrices() {
                    totalCostBasis: data.summary.totalCostBasis };
       const _i = _pcSnaps.findIndex(s => s.date === _d);
       if (_i >= 0) _pcSnaps[_i] = _e; else _pcSnaps.push(_e);
-      renderPortfolioChart(); }
+      renderPortfolioChart();
+      // Reload full history so historical points use fresh Yahoo prices
+      loadPortfolioChart(); }
 
     // Update any visible side panels
     if (activeTab === 'earnings')       renderEarnings(data.holdings);
@@ -2801,6 +2825,7 @@ function showSetup(isEdit = false) {
     setupHoldings = [];
   }
   renderSetupList();
+  document.getElementById('su-purchase-date').value = new Date().toISOString().split('T')[0];
   document.getElementById('setup-overlay').classList.remove('hidden');
 }
 
@@ -2831,11 +2856,12 @@ async function suLookup() {
 }
 
 function suAdd() {
-  const symbol    = document.getElementById('su-symbol').value.toUpperCase().trim();
-  const name      = document.getElementById('su-name').value.trim() || symbol;
-  const shares    = parseFloat(document.getElementById('su-shares').value);
-  const costBasis = parseFloat(document.getElementById('su-cost').value);
-  const sector    = document.getElementById('su-sector').value;
+  const symbol       = document.getElementById('su-symbol').value.toUpperCase().trim();
+  const name         = document.getElementById('su-name').value.trim() || symbol;
+  const shares       = parseFloat(document.getElementById('su-shares').value);
+  const costBasis    = parseFloat(document.getElementById('su-cost').value);
+  const sector       = document.getElementById('su-sector').value;
+  const purchaseDate = document.getElementById('su-purchase-date').value || null;
 
   if (!symbol)       return suFlash('Enter a ticker symbol.');
   if (!shares || shares <= 0) return suFlash('Enter a valid share count.');
@@ -2844,15 +2870,16 @@ function suAdd() {
   // Update if already exists, otherwise append
   const idx = setupHoldings.findIndex(h => h.symbol === symbol);
   if (idx >= 0) {
-    setupHoldings[idx] = { symbol, name, shares, costBasis, sector };
+    setupHoldings[idx] = { symbol, name, shares, costBasis, sector, purchaseDate };
   } else {
-    setupHoldings.push({ symbol, name, shares, costBasis, sector });
+    setupHoldings.push({ symbol, name, shares, costBasis, sector, purchaseDate });
   }
 
   // Clear form fields
   ['su-symbol','su-name','su-shares','su-cost'].forEach(id => {
     document.getElementById(id).value = '';
   });
+  document.getElementById('su-purchase-date').value = new Date().toISOString().split('T')[0];
   document.getElementById('su-lookup-status').textContent = '';
 
   renderSetupList();
@@ -2946,10 +2973,11 @@ function openEditModal(symbol) {
   if (!h) return;
   _editSymbol = symbol;
   document.getElementById('ep-sym-label').textContent = symbol;
-  document.getElementById('ep-name').value   = h.name      || symbol;
-  document.getElementById('ep-shares').value = h.shares;
-  document.getElementById('ep-cost').value   = h.costBasis;
-  document.getElementById('ep-sector').value = h.sector    || 'Other';
+  document.getElementById('ep-name').value          = h.name         || symbol;
+  document.getElementById('ep-shares').value        = h.shares;
+  document.getElementById('ep-cost').value          = h.costBasis;
+  document.getElementById('ep-purchase-date').value = h.purchaseDate  || '';
+  document.getElementById('ep-sector').value        = h.sector        || 'Other';
   document.getElementById('ep-status').textContent = '';
   document.getElementById('ep-save-btn').disabled  = false;
   document.getElementById('ep-save-btn').textContent = 'Save Changes';
@@ -2976,10 +3004,13 @@ async function saveEditModal() {
   btn.disabled = true; btn.textContent = 'Saving…';
   status.textContent = '';
   try {
+    const purchaseDate = document.getElementById('ep-purchase-date').value || null;
     const updated = (portfolioData?.holdings || []).map(h =>
       h.symbol !== _editSymbol
-        ? { symbol: h.symbol, name: h.name, shares: h.shares, costBasis: h.costBasis, sector: h.sector }
-        : { symbol: h.symbol, name: name || h.symbol, shares, costBasis, sector }
+        ? { symbol: h.symbol, name: h.name, shares: h.shares, costBasis: h.costBasis,
+            sector: h.sector, drip: h.drip, flagColor: h.flagColor, purchaseDate: h.purchaseDate }
+        : { symbol: h.symbol, name: name || h.symbol, shares, costBasis, sector,
+            drip: h.drip, flagColor: h.flagColor, purchaseDate }
     );
     const r = await fetch('/api/setup', {
       method:  'POST',
@@ -3415,11 +3446,18 @@ function _pcResample(snaps) {
 }
 
 // ── Y-axis zoom / pan ─────────────────────────────────────────────────────────
-let _pcYMin = null, _pcYMax = null;   // null = auto
+let _pcYMin = null, _pcYMax = null;   // null = use padded default
 let _pcDataMin = 0, _pcDataMax = 1;   // actual data extent (set on each render)
-let _pcRailMargin = 0;                // 50% of data range — slider travel beyond min/max
+let _pcRailMin  = 0, _pcRailMax = 1;  // absolute slider bounds: $0 → 150% of max
 let _pcSliderInited = false;
 let _pcPanStart = null;
+
+// Default padded view: 20% of data span above and below — zoomed-out starting point
+function _pcDefMin() { return _pcDataMin - (_pcDataMax - _pcDataMin) * 0.2; }
+function _pcDefMax() { return _pcDataMax + (_pcDataMax - _pcDataMin) * 0.2; }
+// Effective displayed bounds (user override or padded default)
+function _pcEffMin() { return _pcYMin ?? _pcDefMin(); }
+function _pcEffMax() { return _pcYMax ?? _pcDefMax(); }
 
 function _pcUpdateSlider() {
   const rail  = document.getElementById('pc-y-rail');
@@ -3429,13 +3467,13 @@ function _pcUpdateSlider() {
   if (!rail || !hiEl || !loEl) return;
   const H = rail.clientHeight;
   const pad = 8, innerH = H - pad * 2;
-  // Rail spans the full ±10k range so thumbs can travel end-to-end
-  const railMin = _pcDataMin - _pcRailMargin;
-  const railMax = _pcDataMax + _pcRailMargin;
+  const railMin = _pcRailMin;
+  const railMax = _pcRailMax;
   const railRange = railMax - railMin || 1;
   const toPos = v => pad + (1 - (v - railMin) / railRange) * innerH;
-  const hiPos = Math.max(pad, Math.min(H - pad, toPos(_pcYMax ?? _pcDataMax)));
-  const loPos = Math.max(pad, Math.min(H - pad, toPos(_pcYMin ?? _pcDataMin)));
+  // Thumbs reflect the actual displayed range (including default padding)
+  const hiPos = Math.max(pad, Math.min(H - pad, toPos(_pcEffMax())));
+  const loPos = Math.max(pad, Math.min(H - pad, toPos(_pcEffMin())));
   hiEl.style.top = hiPos + 'px';
   loEl.style.top = loPos + 'px';
   if (fillEl) { fillEl.style.top = hiPos + 'px'; fillEl.style.height = Math.max(0, loPos - hiPos) + 'px'; }
@@ -3445,8 +3483,8 @@ function _pcApplyYBounds(animate) {
   const btn = document.getElementById('pc-zoom-reset');
   if (btn) btn.classList.toggle('engaged', _pcYMin !== null || _pcYMax !== null);
   if (portfolioValueChart && portfolioValueChart._pcType !== 'candle') {
-    portfolioValueChart.options.scales.y.min = _pcYMin ?? undefined;
-    portfolioValueChart.options.scales.y.max = _pcYMax ?? undefined;
+    portfolioValueChart.options.scales.y.min = _pcEffMin();
+    portfolioValueChart.options.scales.y.max = _pcEffMax();
     portfolioValueChart.update(animate ? { duration: 180 } : 'none');
   }
   _pcUpdateSlider();
@@ -3461,9 +3499,7 @@ function _railToY(railEl, clientY) {
   const rect = railEl.getBoundingClientRect();
   const pad = 8, innerH = rect.height - pad * 2;
   const t = Math.max(0, Math.min(1, (clientY - rect.top - pad) / innerH));
-  const railMax = _pcDataMax + _pcRailMargin;
-  const railMin = _pcDataMin - _pcRailMargin;
-  return railMax - t * (railMax - railMin);
+  return _pcRailMax - t * (_pcRailMax - _pcRailMin);
 }
 
 function _initPcSlider() {
@@ -3476,17 +3512,14 @@ function _initPcSlider() {
 
   // Shared pan-start logic used by both the fill handle and the canvas
   const startPan = (clientY) => {
-    _pcPanStart = { y: clientY, yMin: _pcYMin ?? _pcDataMin, yMax: _pcYMax ?? _pcDataMax };
+    _pcPanStart = { y: clientY, yMin: _pcEffMin(), yMax: _pcEffMax() };
   };
   const doPan = (clientY, heightRef) => {
     if (!_pcPanStart) return;
     const span = _pcPanStart.yMax - _pcPanStart.yMin;
-    const shift = ((clientY - _pcPanStart.y) / (heightRef || 1)) * span;
-    let newMin = _pcPanStart.yMin + shift;
-    let newMax = _pcPanStart.yMax + shift;
-    if (newMax > _pcDataMax + _pcRailMargin) { newMax = _pcDataMax + _pcRailMargin; newMin = newMax - span; }
-    if (newMin < _pcDataMin - _pcRailMargin) { newMin = _pcDataMin - _pcRailMargin; newMax = newMin + span; }
-    _pcYMin = newMin; _pcYMax = newMax;
+    const shift = -((clientY - _pcPanStart.y) / (heightRef || 1)) * span;
+    _pcYMin = _pcPanStart.yMin + shift;
+    _pcYMax = _pcPanStart.yMax + shift;
     _pcApplyYBounds(false);
   };
 
@@ -3509,18 +3542,16 @@ function _initPcSlider() {
     });
   }
 
-  const MARGIN = _pcRailMargin;
-
-  const clampHi = v => Math.min(v, _pcDataMax + MARGIN);
-  const clampLo = v => Math.max(v, _pcDataMin - MARGIN);
+  const clampHi = v => Math.min(v, _pcRailMax);
+  const clampLo = v => Math.max(v, _pcRailMin);
 
   const makeDrag = isHi => e => {
     e.preventDefault();
     const minGap = (_pcDataMax - _pcDataMin) * 0.04;
     const onMove = mv => {
       const v = _railToY(rail, mv.clientY);
-      if (isHi) _pcYMax = clampHi(Math.max(v, (_pcYMin ?? _pcDataMin) + minGap));
-      else       _pcYMin = clampLo(Math.min(v, (_pcYMax ?? _pcDataMax) - minGap));
+      if (isHi) _pcYMax = clampHi(Math.max(v, _pcEffMin() + minGap));
+      else       _pcYMin = clampLo(Math.min(v, _pcEffMax() - minGap));
       _pcApplyYBounds(false);
     };
     const onUp = () => { window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp); };
@@ -3543,6 +3574,32 @@ function _initPcSlider() {
   window.addEventListener('mouseup', () => {
     if (_pcPanStart) { _pcPanStart = null; canvas.style.cursor = ''; }
   });
+
+  // Scroll wheel: pan (plain) or zoom (Ctrl)
+  canvas.addEventListener('wheel', e => {
+    e.preventDefault();
+    const curMin = _pcEffMin();
+    const curMax = _pcEffMax();
+    const span   = curMax - curMin;
+
+    if (e.ctrlKey) {
+      // Ctrl+scroll → zoom in/out around center of current view
+      const factor = e.deltaY > 0 ? 0.89 : 1.12;
+      const center = (curMin + curMax) / 2;
+      const half   = (span * factor) / 2;
+      _pcYMin = Math.max(_pcRailMin, center - half);
+      _pcYMax = Math.min(_pcRailMax, center + half);
+    } else {
+      // Plain scroll → pan, clamped to $0 – 150% of max
+      const shift = -(e.deltaY / 100) * span * 0.12;
+      let newMin = curMin + shift, newMax = curMax + shift;
+      if (newMin < _pcRailMin) { newMin = _pcRailMin; newMax = newMin + span; }
+      if (newMax > _pcRailMax) { newMax = _pcRailMax; newMin = newMax - span; }
+      _pcYMin = newMin;
+      _pcYMax = newMax;
+    }
+    _pcApplyYBounds(false);
+  }, { passive: false });
 }
 
 function _pcFilter(snaps) {
@@ -3632,9 +3689,10 @@ function renderPortfolioChart() {
   const lastVal   = vals[vals.length - 1] || 0;
 
   // Track data extent for slider coordinate mapping
-  _pcDataMin = Math.min(...vals) * 0.997;
-  _pcDataMax = Math.max(...vals) * 1.003;
-  _pcRailMargin = (_pcDataMax - _pcDataMin) * 0.5;
+  _pcDataMin = Math.min(...vals);
+  _pcDataMax = Math.max(...vals);
+  _pcRailMin  = 0;                   // bottom of slider = $0
+  _pcRailMax  = _pcDataMax * 1.5;    // top of slider = 150% of all-time high
   const change   = lastVal - firstVal;
   const isUp     = change >= 0;
   const color    = isUp ? '#98c379' : '#e06c75';
@@ -4590,34 +4648,64 @@ const TOUR_KEY = 'argus-tour-seen';
 const TOUR_STEPS = [
   { title:'Welcome to Argus', tab:null, target:null,
     body:'This quick tour covers every feature. Use Next and Back to navigate, or click "Exit tour" to close it at any time.' },
+
   { title:'Header Bar', tab:null, target:'#header',
     body:'Shows live portfolio stats — total value, today\'s dollar gain/loss, and overall return. The Refresh button fetches the latest prices, and the app auto-refreshes every 60 seconds.' },
+
+  { title:'Portfolio Value Chart', tab:'portfolio', target:'#pc-section',
+    body:'A live chart of your total portfolio value, pre-filled with up to one year of history on first launch. Choose a period (1W – ALL), chart type (Area, Line, Candle, Bar), and data frequency (D / W / M / Y). A glowing dot marks the latest data point.' },
+
+  { title:'Y-Axis Zoom & Pan', tab:'portfolio', target:'.pc-y-rail',
+    body:'The slider rail on the left controls the visible price range. Drag either thumb to zoom, drag the fill bar to pan. On the chart canvas: scroll the mouse wheel to pan, or Ctrl+scroll to zoom. The range extends from $0 to 150% of your all-time portfolio peak. Click 🔍 to reset to the default view.' },
+
   { title:'Holdings Table', tab:'portfolio', target:'.table-wrap',
-    body:'Every position with live price, daily change, P&L, current value, portfolio weight, and total gain/loss. Click any column header to sort. Hover a row and click the pencil icon to edit that position.' },
+    body:'Every position with live price, daily change, P&L, value, portfolio weight, and total gain/loss. Each row displays a company logo next to the ticker. Click the coloured triangle in a row\'s top-left corner to assign one of 7 flag colours for at-a-glance labelling. Click any column header to sort. Hover a row and click the pencil icon to edit.' },
+
+  { title:'DRIP (Dividend Reinvestment)', tab:'portfolio', target:'.table-wrap',
+    body:'Each row has a DRIP toggle. When enabled, Argus replays every historical dividend payment for that holding as a share purchase at the ex-dividend closing price — the portfolio chart and history tab reflect the compounded growth.' },
+
+  { title:'Dividends Tab', tab:'dividends', target:'#panel-dividends',
+    body:'A full dividend breakdown for your portfolio: trailing 12-month income per holding, year-over-year growth, payment frequency (monthly / quarterly / semi-annual / annual), estimated next ex-dividend date, and a quarterly income bar chart.' },
+
+  { title:'Resizable Panels', tab:'portfolio', target:'#rh-chart',
+    body:'Drag the thin divider bars between sections to customise the layout. The bar below the chart resizes chart height; the bar below the holdings table compresses it into a scrollable view; the vertical bar between the two allocation charts adjusts their column widths. All sizes are saved across sessions.' },
+
   { title:'Allocation & Sector Charts', tab:'portfolio', target:'.charts-row',
-    body:'The donut chart shows allocation by stock or sector — toggle with the By Stock / By Sector buttons. The bar chart shows sector exposure. Both update on every refresh.' },
+    body:'The donut shows allocation by stock or sector — toggle with By Stock / By Sector. The bar chart shows sector exposure. Both update on every refresh.' },
+
   { title:'Market Ticker', tab:'portfolio', target:'#market-ticker',
     body:'Real-time quotes for S&P 500 Futures, Dow, Nasdaq, Russell 2000, VIX, Gold, Bitcoin, and Crude Oil. Use the ‹ › arrows to scroll. Updates on every refresh.' },
+
   { title:'Buy / Sell Tab', tab:'trade', target:'#panel-trade',
-    body:'Execute trades and update your portfolio automatically. Buying recalculates your average cost basis. Selling reduces your share count — if you sell all shares, the position is removed. Click a chip to pre-fill from an existing holding.' },
+    body:'Execute trades and update your portfolio automatically. Buying recalculates your average cost basis. Selling reduces your share count — if you sell all shares the position is removed. Click a chip to pre-fill from an existing holding.' },
+
   { title:'Add Calculator', tab:'add-calc', target:'#panel-add-calc',
     body:'Model a potential purchase before committing. Enter a dollar amount to see what your new average cost, share count, and portfolio weight would be — without actually making the trade.' },
+
   { title:'Earnings Calendar', tab:'earnings', target:'#panel-earnings',
-    body:'Upcoming earnings dates for all your holdings with a live countdown. Color-coded by urgency: green (far out), yellow (this week), red (imminent or today).' },
+    body:'Upcoming earnings dates for all your holdings with a live countdown. Colour-coded by urgency: green (far out), yellow (this week), red (imminent or today).' },
+
   { title:'Concentration Monitor', tab:'concentration', target:'#panel-concentration',
     body:'Set a weight threshold and this tab flags any position that exceeds it — useful for managing position sizing and staying diversified.' },
+
   { title:'Dip Alert Screener', tab:'dip', target:'#panel-dip',
     body:'Build a custom watchlist and scan for dip-buying opportunities using RSI and distance-from-moving-average signals. Helps surface potentially oversold stocks.' },
+
   { title:'Market Heatmap', tab:'heatmap', target:'#panel-heatmap',
-    body:'A sector-by-sector view of today\'s S&P 500 movers across 11 sectors. Green tiles are up, red are down. The heatmap loads automatically when you open this tab.' },
+    body:'A sector-by-sector view of today\'s S&P 500 movers across 11 sectors. Green tiles are up, red are down. Loads automatically when you open this tab.' },
+
   { title:'Portfolio History', tab:'history', target:'#panel-history',
-    body:'Tracks your total portfolio value over time. A daily snapshot is saved every time you refresh prices. View as area, line, candlestick, or bar — with optional SPY/QQQ benchmark overlays.' },
+    body:'Tracks your portfolio value over time. A daily snapshot is saved on every price refresh. View as area, line, candlestick, or bar chart — with optional SPY and QQQ benchmark overlays.' },
+
   { title:'News Feed', tab:'news', target:'#panel-news',
     body:'Latest financial headlines for your holdings pulled from Yahoo Finance. Updates every 5 minutes. Click any card to open the full article in your browser.' },
+
   { title:'Price Alerts', tab:'alerts', target:'#panel-alerts',
-    body:'Set a price target for any ticker. Argus sends a desktop notification when the price crosses your target — above or below.' },
+    body:'Set a price target for any ticker. Argus sends a Windows desktop notification when the price crosses your target — above or below.' },
+
   { title:'Settings', tab:null, target:'#settings-gear',
-    body:'Click the ⚙ gear in the bottom-right corner anytime to change the color theme (Moonlit, Amber, Macha), adjust the zoom level for your monitor, or relaunch this tour.' },
+    body:'Click the ⚙ gear in the bottom-right corner to change the colour theme (Moonlit, Amber, Matcha), adjust the zoom level for your monitor, view the app version, and manually check for updates. You can also relaunch this tour from here.' },
+
   { title:'You\'re all set!', tab:'portfolio', target:null,
     body:'That\'s the full tour of Argus. You can relaunch this walkthrough anytime from the Settings panel. Enjoy!' },
 ];
@@ -4794,6 +4882,84 @@ function positionTourCard(targetEl) {
 document.addEventListener('click', e => {
   if (!e.target.closest('.tab-group')) closeTabDropdowns();
 });
+
+// ── Resize handles ───────────────────────────────────────────────────────────
+function initResize(handle, getSize, setSize, key, dir, onRelease) {
+  const isV = dir !== 'h';
+  const saved = localStorage.getItem(key);
+  if (saved !== null) setSize(+saved);
+  handle.addEventListener('mousedown', e => {
+    e.preventDefault();
+    const start = isV ? e.clientY : e.clientX;
+    const startSize = getSize();
+    handle.classList.add('rh-active');
+    document.body.classList.add(isV ? 'rh-drag-v' : 'rh-drag-h');
+    function onMove(e2) {
+      const delta = (isV ? e2.clientY : e2.clientX) - start;
+      const min = isV ? 80 : 140, max = isV ? 700 : 560;
+      const next = Math.max(min, Math.min(max, startSize + delta));
+      setSize(next);
+      localStorage.setItem(key, next);
+    }
+    function onUp() {
+      handle.classList.remove('rh-active');
+      document.body.classList.remove('rh-drag-v', 'rh-drag-h');
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      onRelease?.();
+    }
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  });
+}
+
+(function initResizeHandles() {
+  // Chart height
+  const rhChart   = document.getElementById('rh-chart');
+  const chartWrap = document.getElementById('pc-chart-wrap');
+  if (rhChart && chartWrap) {
+    // Set height during drag; let Chart.js ResizeObserver handle the canvas.
+    // On mouseup, call resize() once to finalize and re-fit the Y-axis.
+    const chartArea = chartWrap.parentElement; // .pc-chart-area (flex row)
+    const applyChartH = h => {
+      chartWrap.style.height = h + 'px';
+      chartArea.style.height  = h + 'px'; // force flex container to expand cross-axis
+      _pcUpdateSlider(); // reposition Y-rail thumbs for new rail height
+    };
+    const finalizeChartH = () => {
+      portfolioValueChart?.resize();
+      resetPcZoom(); // restore auto-fit Y-axis after height change
+    };
+    initResize(rhChart,
+      () => chartWrap.offsetHeight,
+      applyChartH,
+      'argus-sz-chart', 'v',
+      finalizeChartH);
+    // If a saved height was restored, finalize after the chart renders
+    if (localStorage.getItem('argus-sz-chart')) {
+      setTimeout(finalizeChartH, 100);
+    }
+  }
+  // Holdings table height
+  const rhTable   = document.getElementById('rh-table');
+  const tableWrap = document.querySelector('#panel-portfolio > .table-wrap');
+  if (rhTable && tableWrap) {
+    initResize(rhTable,
+      () => tableWrap.offsetHeight,
+      h  => { tableWrap.style.maxHeight = h + 'px'; tableWrap.style.overflowY = 'auto'; },
+      'argus-sz-table', 'v');
+  }
+  // Allocation chart column width (horizontal)
+  const rhAlloc   = document.getElementById('rh-alloc');
+  const chartsRow = document.querySelector('.charts-row');
+  const allocCard = chartsRow?.querySelector('.chart-card');
+  if (rhAlloc && allocCard) {
+    initResize(rhAlloc,
+      () => allocCard.offsetWidth,
+      w  => { allocCard.style.width = w + 'px'; },
+      'argus-sz-alloc', 'h');
+  }
+})();
 
 document.addEventListener('keydown', e => {
   const tag = document.activeElement?.tagName;

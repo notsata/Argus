@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.1.4] — 2026-04-17
+
+### New Features
+
+- **Resizable panels**: Drag the divider bars between sections to resize the portfolio chart height, holdings table height, and the allocation/sector chart column width. Sizes persist across sessions via localStorage.
+- **Scroll wheel chart control**: Scroll the mouse wheel on the portfolio chart to pan the Y-axis up or down. Hold Ctrl while scrolling to zoom in or out around the center of the current view.
+- **Extended Y-axis range**: The zoom slider and scroll wheel now reach from $0 at the bottom to 150% of your all-time portfolio peak at the top.
+- **Wider default Y-axis view**: The chart now starts with 20% padding above and below the data range instead of the tight Chart.js auto-fit, giving more vertical context at a glance.
+
+### Improvements
+
+- **Y-axis slider**: Slider travel increased from ±50% to the full $0–150% range. Thumb positions now accurately reflect the actual displayed window including default padding. Dragging the fill bar and scroll-wheel pan have inverted direction to feel more natural (drag/scroll down = pan up).
+- **Ctrl+scroll zoom direction**: Scroll down to zoom in (tighter range), scroll up to zoom out — consistent with standard chart zoom conventions.
+- **Overlay fix**: Chart canvas now correctly reflows within its section when resized, preventing it from painting over the holdings table below.
+- **Tour updated**: The feature walkthrough now covers all new features: Portfolio Value Chart, Y-axis Zoom & Pan, DRIP, Dividends tab, Holding Flags, and Resizable Panels.
+
+---
+
 ## [1.1.3] — 2026-04-16
 
 ### New Features
