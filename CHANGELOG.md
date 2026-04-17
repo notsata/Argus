@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.1.2] — 2026-04-16
+
+### Improvements
+
+- **History tab pre-fill**: Portfolio History now loads the same 1-year reconstructed data as the main chart. Previously the History tab showed only recorded daily snapshots, leaving it empty on first launch.
+- **Y-axis slider range**: Slider travel is now capped at ±50% of the portfolio's data span rather than a fixed ±$10,000. The zoom range scales proportionally with portfolio size.
+- **Yahoo Finance timeout**: All Yahoo Finance requests now time out after 10 seconds. Previously a slow or unresponsive connection would leave the app stuck on the loading screen indefinitely.
+- **Candle chart data source**: Candlestick chart now always draws from the full daily dataset, ensuring genuine OHLC spread regardless of which D/W/M/Y frequency is selected.
+
+### Security
+
+- Rate limit added to the portfolio reset endpoint (5 requests per minute) to prevent denial-of-service via rapid file system operations.
+
+---
+
 ## [1.1.1] — 2026-04-16
 
 ### Portfolio Chart — Major Overhaul

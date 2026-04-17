@@ -3001,6 +3001,7 @@ function _pcResample(snaps) {
 // ── Y-axis zoom / pan ─────────────────────────────────────────────────────────
 let _pcYMin = null, _pcYMax = null;   // null = auto
 let _pcDataMin = 0, _pcDataMax = 1;   // actual data extent (set on each render)
+let _pcRailMargin = 0;                // 50% of data range — slider travel beyond min/max
 let _pcSliderInited = false;
 let _pcPanStart = null;
 
@@ -3013,8 +3014,8 @@ function _pcUpdateSlider() {
   const H = rail.clientHeight;
   const pad = 8, innerH = H - pad * 2;
   // Rail spans the full ±10k range so thumbs can travel end-to-end
-  const railMin = _pcDataMin - 10000;
-  const railMax = _pcDataMax + 10000;
+  const railMin = _pcDataMin - _pcRailMargin;
+  const railMax = _pcDataMax + _pcRailMargin;
   const railRange = railMax - railMin || 1;
   const toPos = v => pad + (1 - (v - railMin) / railRange) * innerH;
   const hiPos = Math.max(pad, Math.min(H - pad, toPos(_pcYMax ?? _pcDataMax)));
@@ -3044,8 +3045,8 @@ function _railToY(railEl, clientY) {
   const rect = railEl.getBoundingClientRect();
   const pad = 8, innerH = rect.height - pad * 2;
   const t = Math.max(0, Math.min(1, (clientY - rect.top - pad) / innerH));
-  const railMax = _pcDataMax + 10000;
-  const railMin = _pcDataMin - 10000;
+  const railMax = _pcDataMax + _pcRailMargin;
+  const railMin = _pcDataMin - _pcRailMargin;
   return railMax - t * (railMax - railMin);
 }
 
@@ -3067,8 +3068,8 @@ function _initPcSlider() {
     const shift = ((clientY - _pcPanStart.y) / (heightRef || 1)) * span;
     let newMin = _pcPanStart.yMin + shift;
     let newMax = _pcPanStart.yMax + shift;
-    if (newMax > _pcDataMax + 10000) { newMax = _pcDataMax + 10000; newMin = newMax - span; }
-    if (newMin < _pcDataMin - 10000) { newMin = _pcDataMin - 10000; newMax = newMin + span; }
+    if (newMax > _pcDataMax + _pcRailMargin) { newMax = _pcDataMax + _pcRailMargin; newMin = newMax - span; }
+    if (newMin < _pcDataMin - _pcRailMargin) { newMin = _pcDataMin - _pcRailMargin; newMax = newMin + span; }
     _pcYMin = newMin; _pcYMax = newMax;
     _pcApplyYBounds(false);
   };
@@ -3092,7 +3093,7 @@ function _initPcSlider() {
     });
   }
 
-  const MARGIN = 10000; // max $10k beyond historical high/low
+  const MARGIN = _pcRailMargin;
 
   const clampHi = v => Math.min(v, _pcDataMax + MARGIN);
   const clampLo = v => Math.max(v, _pcDataMin - MARGIN);
@@ -3204,6 +3205,7 @@ function renderPortfolioChart() {
   // Track data extent for slider coordinate mapping
   _pcDataMin = Math.min(...vals) * 0.997;
   _pcDataMax = Math.max(...vals) * 1.003;
+  _pcRailMargin = (_pcDataMax - _pcDataMin) * 0.5;
   const change   = lastVal - firstVal;
   const isUp     = change >= 0;
   const color    = isUp ? '#98c379' : '#e06c75';

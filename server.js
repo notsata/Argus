@@ -16,6 +16,11 @@ function _rateLimit(key, max) {
   return true;
 }
 
+// Yahoo Finance fetch with 10-second timeout
+function _yFetch(url, opts = {}) {
+  return fetch(url, { ...opts, signal: AbortSignal.timeout(10000) });
+}
+
 // ── Encryption helpers (AES-256-GCM) ─────────────────────────────────────────
 // Key is set by electron-main.js via ARGUS_CRYPTO_KEY (64 hex chars = 32 bytes).
 // Falls back to plain JSON when the key isn't present (dev/non-Electron runs).
@@ -127,12 +132,12 @@ let _crumb  = null;
 
 async function getYahooAuth() {
   if (_cookie && _crumb) return;
-  const cookieRes = await fetch('https://fc.yahoo.com/', {
+  const cookieRes = await _yFetch('https://fc.yahoo.com/', {
     redirect: 'manual', headers: { 'User-Agent': UA },
   });
   const raw = cookieRes.headers.get('set-cookie') || '';
   _cookie = raw.split(/,(?=[^ ].*?=)/).map(c => c.split(';')[0].trim()).join('; ');
-  const crumbRes = await fetch('https://query2.finance.yahoo.com/v1/test/getcrumb', {
+  const crumbRes = await _yFetch('https://query2.finance.yahoo.com/v1/test/getcrumb', {
     headers: { 'User-Agent': UA, 'Cookie': _cookie },
   });
   _crumb = (await crumbRes.text()).trim();
@@ -152,12 +157,12 @@ async function fetchYahooQuotes(symbols) {
     `&fields=regularMarketPrice,regularMarketChange,regularMarketChangePercent,` +
     `fiftyTwoWeekHigh,fiftyTwoWeekLow,earningsTimestamp,earningsTimestampStart,` +
     `earningsTimestampEnd,epsForwardAnnual,epsTrailingTwelveMonths,longName,shortName`;
-  let res = await fetch(buildUrl(), { headers: { 'User-Agent': UA, 'Cookie': _cookie } });
+  let res = await _yFetch(buildUrl(), { headers: { 'User-Agent': UA, 'Cookie': _cookie } });
   if (res.status === 401) {
     // Token expired — re-auth once and retry
     _cookie = null; _crumb = null;
     await getYahooAuth();
-    res = await fetch(buildUrl(), { headers: { 'User-Agent': UA, 'Cookie': _cookie } });
+    res = await _yFetch(buildUrl(), { headers: { 'User-Agent': UA, 'Cookie': _cookie } });
   }
   if (!res.ok) { _cookie = null; _crumb = null; throw new Error(`Yahoo Finance HTTP ${res.status}`); }
   const json = await res.json();
@@ -318,7 +323,7 @@ app.post('/api/technicals', async (req, res) => {
     const results = await Promise.all(symbols.map(async sym => {
       try {
         const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1d&range=1y&crumb=${encodeURIComponent(_crumb)}`;
-        const r   = await fetch(url, { headers: { 'User-Agent': UA, 'Cookie': _cookie } });
+        const r   = await _yFetch(url, { headers: { 'User-Agent': UA, 'Cookie': _cookie } });
         if (!r.ok) { if (r.status===401){_cookie=null;_crumb=null;} throw new Error(`HTTP ${r.status}`); }
         const json   = await r.json();
         const closes = json?.chart?.result?.[0]?.indicators?.quote?.[0]?.close;
@@ -378,7 +383,7 @@ app.get('/api/news', async (_req, res) => {
     const symbols = HOLDINGS.slice(0, 8).map(h => h.symbol);
     const results = await Promise.all(symbols.map(async sym => {
       try {
-        const r    = await fetch(
+        const r    = await _yFetch(
           `https://query1.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(sym)}&newsCount=4&quotesCount=0`,
           { headers: { 'User-Agent': UA } }
         );
@@ -434,7 +439,7 @@ app.get('/api/benchmark', async (_req, res) => {
     await getYahooAuth();
     const results = await Promise.all(['SPY', 'QQQ'].map(async sym => {
       const url = `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1y&crumb=${encodeURIComponent(_crumb)}`;
-      const r   = await fetch(url, { headers: { 'User-Agent': UA, 'Cookie': _cookie } });
+      const r   = await _yFetch(url, { headers: { 'User-Agent': UA, 'Cookie': _cookie } });
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       const json       = await r.json();
       const result     = json?.chart?.result?.[0];
@@ -504,7 +509,7 @@ app.get('/api/portfolio-history', async (_req, res) => {
       try {
         const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(h.symbol)}` +
                     `?interval=1d&range=1y&crumb=${encodeURIComponent(_crumb)}`;
-        const r = await fetch(url, { headers: { 'User-Agent': UA, 'Cookie': _cookie } });
+        const r = await _yFetch(url, { headers: { 'User-Agent': UA, 'Cookie': _cookie } });
         if (!r.ok) { if (r.status === 401) { _cookie = null; _crumb = null; } throw new Error(`HTTP ${r.status}`); }
         const json       = await r.json();
         const result     = json?.chart?.result?.[0];
