@@ -5,6 +5,8 @@ const path    = require('path');
 const fs      = require('fs');
 const crypto  = require('crypto');
 
+const { version: APP_VERSION } = require('./package.json');
+
 // Simple in-memory rate limiter (per key, per minute)
 const _rlBuckets = {};
 function _rateLimit(key, max) {
@@ -96,14 +98,13 @@ function loadSnapshots() {
 function saveSnapshotForToday(summary) {
   try {
     const today = new Date().toISOString().split('T')[0];
-    const snaps = loadSnapshots();
     const entry = { date: today, totalValue: summary.totalValue, totalGain: summary.totalGain,
                     totalGainPct: summary.totalGainPct, totalCostBasis: summary.totalCostBasis };
-    if (snaps.length && snaps[snaps.length - 1].date === today) {
-      snaps[snaps.length - 1] = entry;        // update today's value
-    } else {
-      snaps.push(entry);
-    }
+    // Dedup: keep last entry per date, then upsert today
+    const byDate = {};
+    loadSnapshots().forEach(s => { byDate[s.date] = s; });
+    byDate[today] = entry;
+    const snaps = Object.values(byDate).sort((a, b) => a.date < b.date ? -1 : 1);
     fs.writeFileSync(SNAPSHOTS_FILE, encryptJSON(snaps.slice(-365)), 'utf8');
   } catch (e) { console.warn('Snapshot save error:', e.message); }
 }
@@ -171,6 +172,9 @@ async function fetchYahooQuotes(symbols) {
   return results;
 }
 
+// ── App version ───────────────────────────────────────────────────────────────
+app.get('/api/version', (_req, res) => res.json({ version: APP_VERSION }));
+
 // ── Setup status ──────────────────────────────────────────────────────────────
 app.get('/api/setup-status', (_req, res) => {
   res.json({ configured: HOLDINGS.length > 0, count: HOLDINGS.length });
@@ -187,6 +191,8 @@ app.post('/api/setup', (req, res) => {
     shares:    Math.max(0, parseFloat(h.shares)    || 0),
     costBasis: Math.max(0, parseFloat(h.costBasis) || 0),
     sector:    String(h.sector || 'Other').replace(/[<>"'&]/g, '').trim().slice(0, 40),
+    drip:      Boolean(h.drip) || false,
+    flagColor: h.flagColor || null,
     weight:    0,
   })).filter(h => h.symbol && h.shares > 0);
   if (validated.length === 0)
@@ -203,6 +209,35 @@ app.delete('/api/setup', (_req, res) => {
   HOLDINGS = [];
   try { fs.unlinkSync(HOLDINGS_FILE); } catch {}
   res.json({ success: true });
+});
+
+// ── Toggle DRIP per holding ───────────────────────────────────────────────────
+app.patch('/api/holdings/:symbol/drip', (req, res) => {
+  const sym = String(req.params.symbol).toUpperCase().replace(/[^A-Z0-9.^-]/g, '').slice(0, 12);
+  if (!sym) return res.status(400).json({ error: 'invalid symbol' });
+  const { drip } = req.body;
+  if (typeof drip !== 'boolean') return res.status(400).json({ error: 'drip must be boolean' });
+  const idx = HOLDINGS.findIndex(h => h.symbol === sym);
+  if (idx === -1) return res.status(404).json({ error: 'holding not found' });
+  HOLDINGS[idx].drip = drip;
+  saveHoldings(HOLDINGS);
+  _portfolioHistoryCache = null;
+  res.json({ success: true, symbol: sym, drip });
+});
+
+// ── Set flag color per holding ────────────────────────────────────────────────
+const _validFlags = new Set(['red','orange','yellow','green','blue','purple','cyan']);
+app.patch('/api/holdings/:symbol/flag', (req, res) => {
+  const sym = String(req.params.symbol).toUpperCase().replace(/[^A-Z0-9.^-]/g, '').slice(0, 12);
+  if (!sym) return res.status(400).json({ error: 'invalid symbol' });
+  const { flagColor } = req.body;
+  if (flagColor !== null && flagColor !== undefined && !_validFlags.has(flagColor))
+    return res.status(400).json({ error: 'invalid flagColor' });
+  const idx = HOLDINGS.findIndex(h => h.symbol === sym);
+  if (idx === -1) return res.status(404).json({ error: 'holding not found' });
+  HOLDINGS[idx].flagColor = flagColor || null;
+  saveHoldings(HOLDINGS);
+  res.json({ success: true, symbol: sym, flagColor: HOLDINGS[idx].flagColor });
 });
 
 // ── Static holdings ───────────────────────────────────────────────────────────
@@ -504,11 +539,11 @@ app.get('/api/portfolio-history', async (_req, res) => {
   try {
     await getYahooAuth();
 
-    // Fetch 1-year daily closes for every holding in parallel
+    // Fetch 1-year daily closes + dividend events for every holding in parallel
     const holdingData = await Promise.all(HOLDINGS.map(async h => {
       try {
         const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(h.symbol)}` +
-                    `?interval=1d&range=1y&crumb=${encodeURIComponent(_crumb)}`;
+                    `?interval=1d&range=1y&events=dividends&crumb=${encodeURIComponent(_crumb)}`;
         const r = await _yFetch(url, { headers: { 'User-Agent': UA, 'Cookie': _cookie } });
         if (!r.ok) { if (r.status === 401) { _cookie = null; _crumb = null; } throw new Error(`HTTP ${r.status}`); }
         const json       = await r.json();
@@ -519,12 +554,34 @@ app.get('/api/portfolio-history', async (_req, res) => {
         timestamps.forEach((ts, i) => {
           if (closes[i] != null) prices[new Date(ts * 1000).toISOString().split('T')[0]] = closes[i];
         });
-        return { symbol: h.symbol, shares: h.shares, costBasis: h.costBasis, prices };
+        const divRaw   = result?.events?.dividends || {};
+        const dividends = Object.values(divRaw)
+          .map(d => ({ date: new Date(d.date * 1000).toISOString().split('T')[0], amount: d.amount }))
+          .sort((a, b) => a.date < b.date ? -1 : 1);
+        return { symbol: h.symbol, shares: h.shares, costBasis: h.costBasis, drip: h.drip || false, prices, dividends };
       } catch (e) {
         console.warn('[portfolio-history]', h.symbol + ':', e.message);
-        return { symbol: h.symbol, shares: h.shares, costBasis: h.costBasis, prices: {} };
+        return { symbol: h.symbol, shares: h.shares, costBasis: h.costBasis, drip: h.drip || false, prices: {}, dividends: [] };
       }
     }));
+
+    // Build DRIP share schedules: for each DRIP holding replay dividend events
+    // to compute cumulative shares owned after each reinvestment.
+    holdingData.forEach(h => {
+      if (!h.drip || !h.dividends.length) { h.shareSchedule = null; return; }
+      const priceDates = Object.keys(h.prices).sort();
+      let running = h.shares;
+      const schedule = [{ date: '0000-00-00', shares: running }];
+      for (const div of h.dividends) {
+        const pd = priceDates.find(d => d >= div.date);
+        if (!pd) continue;
+        const price = h.prices[pd];
+        if (!price || price <= 0) continue;
+        running += (running * div.amount) / price;
+        schedule.push({ date: pd, shares: running });
+      }
+      h.shareSchedule = schedule;
+    });
 
     // Union of all dates that appear in any holding's price history
     const allDates = new Set();
@@ -536,8 +593,14 @@ app.get('/api/portfolio-history', async (_req, res) => {
     const history = sortedDates.map(date => {
       let totalValue = 0;
       holdingData.forEach(h => {
-        // Use that day's close if available, otherwise fall back to cost basis
-        totalValue += h.shares * (h.prices[date] ?? h.costBasis);
+        let shares = h.shares;
+        if (h.drip && h.shareSchedule) {
+          for (const s of h.shareSchedule) {
+            if (s.date <= date) shares = s.shares;
+            else break;
+          }
+        }
+        totalValue += shares * (h.prices[date] ?? h.costBasis);
       });
       const totalGain = totalValue - totalCostBasis;
       return {
@@ -549,12 +612,144 @@ app.get('/api/portfolio-history', async (_req, res) => {
       };
     });
 
-    const payload = { history, asOf: new Date().toISOString() };
+    // Summarise DRIP activity per holding for the client
+    const dripStats = {};
+    holdingData.forEach(h => {
+      if (h.drip && h.shareSchedule && h.shareSchedule.length > 1) {
+        const last = h.shareSchedule[h.shareSchedule.length - 1];
+        dripStats[h.symbol] = {
+          count:       h.dividends.length,
+          extraShares: +(last.shares - h.shares).toFixed(6),
+        };
+      }
+    });
+
+    const payload = { history, dripStats, asOf: new Date().toISOString() };
     _portfolioHistoryCache = payload;
     _portfolioHistoryCacheTs = Date.now();
     res.json(payload);
   } catch (err) {
     console.error('[portfolio-history]', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── Dividend income (2-year history for growth comparison) ────────────────────
+let _dividendsCache    = null;
+let _dividendsCacheTs  = 0;
+const DIVIDENDS_TTL    = 60 * 60 * 1000; // 1 hour
+
+app.get('/api/dividends', async (_req, res) => {
+  if (_dividendsCache && (Date.now() - _dividendsCacheTs) < DIVIDENDS_TTL)
+    return res.json(_dividendsCache);
+  if (HOLDINGS.length === 0) return res.json({ holdings: [], summary: {} });
+  try {
+    await getYahooAuth();
+
+    const now        = Date.now();
+    const oneYearAgo = new Date(now - 365 * 864e5).toISOString().split('T')[0];
+    const twoYrsAgo  = new Date(now - 730 * 864e5).toISOString().split('T')[0];
+
+    // Fetch current quotes for price/yield calc alongside dividend history
+    const quotes    = await fetchYahooQuotes(HOLDINGS.map(h => h.symbol));
+    const bySymbol  = Object.fromEntries(quotes.map(q => [q.symbol, q]));
+
+    const holdingDivs = await Promise.all(HOLDINGS.map(async h => {
+      try {
+        const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(h.symbol)}` +
+                    `?interval=1d&range=2y&events=dividends&crumb=${encodeURIComponent(_crumb)}`;
+        const r   = await _yFetch(url, { headers: { 'User-Agent': UA, 'Cookie': _cookie } });
+        if (!r.ok) { if (r.status === 401) { _cookie = null; _crumb = null; } throw new Error(`HTTP ${r.status}`); }
+        const json = await r.json();
+        const divRaw = json?.chart?.result?.[0]?.events?.dividends || {};
+        const divs   = Object.values(divRaw)
+          .map(d => ({ date: new Date(d.date * 1000).toISOString().split('T')[0], amount: d.amount }))
+          .sort((a, b) => a.date < b.date ? -1 : 1);
+
+        const trailing = divs.filter(d => d.date >= oneYearAgo);
+        const prior    = divs.filter(d => d.date >= twoYrsAgo && d.date < oneYearAgo);
+        const trailingSum = trailing.reduce((s, d) => s + d.amount, 0);
+        const priorSum    = prior   .reduce((s, d) => s + d.amount, 0);
+
+        // Frequency from average interval between trailing dividends
+        let frequency = null;
+        if (trailing.length >= 2) {
+          let totalDays = 0;
+          for (let i = 1; i < trailing.length; i++)
+            totalDays += (new Date(trailing[i].date) - new Date(trailing[i-1].date)) / 864e5;
+          const avg = totalDays / (trailing.length - 1);
+          frequency = avg < 40 ? 'monthly' : avg < 100 ? 'quarterly' : avg < 200 ? 'semi-annual' : 'annual';
+        } else if (divs.length >= 1) {
+          frequency = 'annual';
+        }
+
+        // Estimate next ex-dividend date
+        let nextEstDate = null;
+        if (trailing.length > 0 && frequency) {
+          const lastMs = new Date(trailing[trailing.length - 1].date + 'T12:00:00Z').getTime();
+          const step   = { monthly: 30, quarterly: 91, 'semi-annual': 182, annual: 365 }[frequency];
+          nextEstDate  = new Date(lastMs + step * 864e5).toISOString().split('T')[0];
+        }
+
+        // Quarterly income buckets (last 8 quarters, actual shares)
+        const quarterlyIncome = {};
+        divs.forEach(d => {
+          const dt = new Date(d.date + 'T12:00:00Z');
+          const qk = `${dt.getUTCFullYear()}-Q${Math.ceil((dt.getUTCMonth() + 1) / 3)}`;
+          quarterlyIncome[qk] = (quarterlyIncome[qk] || 0) + d.amount * h.shares;
+        });
+
+        const price = bySymbol[h.symbol]?.regularMarketPrice || null;
+        return {
+          symbol: h.symbol, name: h.name, shares: h.shares, drip: h.drip || false, price,
+          trailingAnnualDiv: +trailingSum.toFixed(4),
+          priorAnnualDiv:    +priorSum   .toFixed(4),
+          annualIncome:      +(trailingSum * h.shares).toFixed(2),
+          yield:  (price && trailingSum) ? +((trailingSum / price) * 100).toFixed(2) : null,
+          growth: (priorSum > 0 && trailingSum > 0) ? +((trailingSum - priorSum) / priorSum * 100).toFixed(2) : null,
+          frequency, nextEstDate,
+          dividends: divs, quarterlyIncome,
+        };
+      } catch (e) {
+        console.warn('[dividends]', h.symbol + ':', e.message);
+        return { symbol: h.symbol, name: h.name, shares: h.shares, drip: h.drip || false,
+                 price: null, trailingAnnualDiv: 0, priorAnnualDiv: 0, annualIncome: 0,
+                 yield: null, growth: null, frequency: null, nextEstDate: null,
+                 dividends: [], quarterlyIncome: {} };
+      }
+    }));
+
+    const totalAnnualIncome = holdingDivs.reduce((s, h) => s + h.annualIncome, 0);
+    const totalValue = HOLDINGS.reduce((s, h) => {
+      const price = bySymbol[h.symbol]?.regularMarketPrice || h.costBasis;
+      return s + h.shares * price;
+    }, 0);
+    const growthVals  = holdingDivs.filter(h => h.growth !== null).map(h => h.growth);
+    const avgGrowth   = growthVals.length ? growthVals.reduce((s, g) => s + g, 0) / growthVals.length : null;
+    const payingCount = holdingDivs.filter(h => h.trailingAnnualDiv > 0).length;
+
+    // Merge all quarterly buckets for the portfolio chart
+    const portfolioQuarterly = {};
+    holdingDivs.forEach(h => {
+      Object.entries(h.quarterlyIncome).forEach(([qk, inc]) => {
+        portfolioQuarterly[qk] = (portfolioQuarterly[qk] || 0) + inc;
+      });
+    });
+
+    const payload = {
+      holdings: holdingDivs,
+      summary: {
+        totalAnnualIncome: +totalAnnualIncome.toFixed(2),
+        portfolioYield:    totalValue > 0 ? +((totalAnnualIncome / totalValue) * 100).toFixed(2) : 0,
+        avgGrowth:         avgGrowth !== null ? +avgGrowth.toFixed(2) : null,
+        payingCount, totalCount: HOLDINGS.length,
+        quarterlyIncome: portfolioQuarterly,
+      },
+    };
+    _dividendsCache = payload; _dividendsCacheTs = Date.now();
+    res.json(payload);
+  } catch (err) {
+    console.error('[dividends]', err.message);
     res.status(500).json({ error: err.message });
   }
 });

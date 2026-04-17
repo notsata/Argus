@@ -14,4 +14,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   // Called by the "Restart Now" button to trigger install-and-relaunch
   installUpdate: () => ipcRenderer.send('install-update'),
+
+  // Called by the "Check for Updates" button in Settings
+  checkForUpdates: () => ipcRenderer.send('check-for-updates'),
 });

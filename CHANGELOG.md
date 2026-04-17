@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.3] — 2026-04-16
+
+### New Features
+
+- **Dividends tab**: New tab under PORTFOLIO showing trailing 12-month dividend income per holding, YoY growth vs. prior year, payment frequency detection, estimated next ex-dividend date, and a quarterly income bar chart. Data sourced from Yahoo Finance dividend event history.
+- **DRIP (Dividend Reinvestment)**: Per-holding toggle to auto-reinvest dividends. When enabled, the portfolio chart and history tab reflect compounded share growth from each historical dividend payment.
+- **Holding flags**: Click the top-left corner of any row to assign a colored flag (7 colors). Flags are stored on disk and survive restarts.
+- **Company logos**: Stock logos displayed beside each ticker in the holdings table, with a letter-circle fallback for unlisted symbols.
+- **Version & update check**: App version shown in Settings. "Check for Updates" button manually triggers the auto-updater.
+
+---
+
 ## [1.1.2] — 2026-04-16
 
 ### Improvements

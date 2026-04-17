@@ -10,82 +10,86 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   /* ── Moonlit (default) ──────────────────────────────────────── */
-  --bg:        #0a0f24;
-  --bg2:       #060b1a;
-  --surface:   #0f1535;
-  --card:      #121c3a;
-  --border:    #0d1332;
-  --border2:   #1a2248;
-  --sel:       #1f2f5a;
-  --green:     #98c379;
-  --green-dim: rgba(152,195,121,.1);
-  --red:       #e06c75;
-  --red-dim:   rgba(224,108,117,.1);
-  --blue:      #61afef;
-  --blue-dim:  rgba(97,175,239,.1);
-  --yellow:    #e5c07b;
-  --yellow-dim:rgba(229,192,123,.1);
-  --purple:    #c678dd;
-  --cyan:      #56b6c2;
-  --text:      #abb2bf;
-  --text-2:    #5c6370;
-  --text-3:    #3e4451;
+  --bg:        #0c1228;
+  --bg2:       #080e1e;
+  --surface:   #121940;
+  --card:      #162044;
+  --border:    #101838;
+  --border2:   #1e2858;
+  --sel:       #263870;
+  --green:     #a3d182;
+  --green-dim: rgba(163,209,130,.12);
+  --red:       #e8787f;
+  --red-dim:   rgba(232,120,127,.12);
+  --blue:      #6dbeff;
+  --blue-dim:  rgba(109,190,255,.12);
+  --yellow:    #edca80;
+  --yellow-dim:rgba(237,202,128,.12);
+  --purple:    #d080ee;
+  --cyan:      #5ec8d5;
+  --text:      #c0c8d4;
+  --text-2:    #808a98;
+  --text-3:    #566070;
   --mono:      'Cascadia Code','JetBrains Mono','Fira Code',Consolas,monospace;
   /* ── Theme-sensitive gradient palette (overridden per theme) ── */
-  --body-bg:  #0a0e27;
-  --gc-1:#0f1535; --gc-2:#131e48; --gc-3:#0d1333; --gc-4:#111b42;
-  --hc-1:#060b1a; --hc-2:#0c1535; --hc-3:#07102a; --hc-4:#0b1432;
-  --hc-5:#091228; --hc-6:#0a1330;
-  --orb1:rgba(26,31,77,.9);   --orb2:rgba(45,58,140,.42);
-  --orb3:rgba(13,27,61,.82);  --orb4:rgba(30,27,75,.5);
+  --body-bg:  #0a1028;
+  --gc-1:#121940; --gc-2:#162050; --gc-3:#101838; --gc-4:#142048;
+  --hc-1:#080e1e; --hc-2:#0e1838; --hc-3:#090f2a; --hc-4:#0c1635;
+  --hc-5:#0a1430; --hc-6:#0b1535;
+  --orb1:rgba(30,40,95,.9);   --orb2:rgba(55,72,168,.44);
+  --orb3:rgba(16,32,78,.84);  --orb4:rgba(38,34,96,.52);
 }
 
 /* ── Amber theme ────────────────────────────────────────────────────────────── */
 [data-theme="amber"]{
-  --bg:        #221100;
-  --bg2:       #160900;
-  --surface:   #321a00;
-  --card:      #3d2200;
-  --border:    #2a1400;
-  --border2:   #452800;
-  --sel:       #5c3600;
-  --blue:      #e8a020;
-  --blue-dim:  rgba(232,160,32,.15);
-  --yellow:    #f5c050;
-  --yellow-dim:rgba(245,192,80,.12);
-  --text:      #d8c4a8;
-  --text-2:    #8e7258;
-  --text-3:    #5a4638;
-  --body-bg:   #1a0b00;
-  --gc-1:#321a00; --gc-2:#4a2600; --gc-3:#281400; --gc-4:#3d2000;
-  --hc-1:#160900; --hc-2:#2c1400; --hc-3:#1e0d00; --hc-4:#251100;
-  --hc-5:#210f00; --hc-6:#2c1300;
-  --orb1:rgba(150,70,8,.9);  --orb2:rgba(200,105,14,.44);
-  --orb3:rgba(105,48,5,.84); --orb4:rgba(165,85,10,.52);
+  --bg:        #281600;
+  --bg2:       #1c0e00;
+  --surface:   #3c2200;
+  --card:      #4a2a00;
+  --border:    #321a00;
+  --border2:   #543200;
+  --sel:       #704200;
+  --blue:      #f4a820;
+  --blue-dim:  rgba(244,168,32,.18);
+  --yellow:    #ffcc58;
+  --yellow-dim:rgba(255,204,88,.14);
+  --green:     #a3d182;
+  --red:       #e8787f;
+  --text:      #e8d4b8;
+  --text-2:    #ac8e70;
+  --text-3:    #786050;
+  --body-bg:   #1e0e00;
+  --gc-1:#3c2200; --gc-2:#542e00; --gc-3:#301a00; --gc-4:#482800;
+  --hc-1:#1c0e00; --hc-2:#361a00; --hc-3:#261200; --hc-4:#2e1600;
+  --hc-5:#2a1400; --hc-6:#361800;
+  --orb1:rgba(170,85,10,.9);  --orb2:rgba(220,125,18,.46);
+  --orb3:rgba(125,60,6,.86);  --orb4:rgba(190,100,14,.54);
 }
 
-/* ── Macha theme ────────────────────────────────────────────────────────────── */
+/* ── Matcha theme ───────────────────────────────────────────────────────────── */
 [data-theme="matcha"]{
-  --bg:        #0e200d;
-  --bg2:       #091509;
-  --surface:   #162a15;
-  --card:      #1c3219;
-  --border:    #122112;
-  --border2:   #1e3820;
-  --sel:       #274a26;
-  --blue:      #72d088;
-  --blue-dim:  rgba(114,208,136,.15);
-  --green:     #96e090;
-  --green-dim: rgba(150,224,144,.12);
-  --text:      #b5c5ac;
-  --text-2:    #688068;
-  --text-3:    #475847;
-  --body-bg:   #091509;
-  --gc-1:#162a15; --gc-2:#1e3820; --gc-3:#122214; --gc-4:#1a2e1a;
-  --hc-1:#091509; --hc-2:#112511; --hc-3:#0d1d0d; --hc-4:#0f210f;
-  --hc-5:#0e1e0e; --hc-6:#112411;
-  --orb1:rgba(22,95,22,.9);  --orb2:rgba(40,140,38,.44);
-  --orb3:rgba(14,72,14,.84); --orb4:rgba(30,108,28,.52);
+  --bg:        #102610;
+  --bg2:       #0b1a0b;
+  --surface:   #183218;
+  --card:      #1e3c1e;
+  --border:    #142814;
+  --border2:   #224422;
+  --sel:       #2e5830;
+  --blue:      #80e096;
+  --blue-dim:  rgba(128,224,150,.18);
+  --green:     #a4ee9c;
+  --green-dim: rgba(164,238,156,.14);
+  --red:       #e8787f;
+  --yellow:    #edca80;
+  --text:      #c8d8be;
+  --text-2:    #86a286;
+  --text-3:    #607a60;
+  --body-bg:   #0b1a0b;
+  --gc-1:#183218; --gc-2:#204220; --gc-3:#142814; --gc-4:#1c3a1c;
+  --hc-1:#0b1a0b; --hc-2:#142814; --hc-3:#0f200f; --hc-4:#122212;
+  --hc-5:#112011; --hc-6:#142814;
+  --orb1:rgba(26,110,26,.9);  --orb2:rgba(48,160,46,.46);
+  --orb3:rgba(18,86,18,.86);  --orb4:rgba(36,128,34,.54);
 }
 
 html,body{height:100%;background:var(--body-bg);color:var(--text);font-family:var(--mono);font-size:13px;line-height:1.5;overflow:hidden}
@@ -245,7 +249,7 @@ html,body{height:100%;background:var(--body-bg);color:var(--text);font-family:va
   width:7px;height:7px;border-radius:50%;
   background:var(--green);flex-shrink:0;
 }
-.header-center{display:flex;align-items:center;gap:20px}
+.header-center{display:flex;align-items:center;gap:20px;justify-content:center}
 .header-right{display:flex;align-items:center;gap:12px;justify-content:flex-end}
 .stat-group{display:flex;flex-direction:column;align-items:center;gap:1px}
 .stat-label{font-size:9px;color:var(--text-2);letter-spacing:.06em;text-transform:uppercase;line-height:1}
@@ -265,20 +269,24 @@ html,body{height:100%;background:var(--body-bg);color:var(--text);font-family:va
 #refresh-btn.spinning svg{animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 #last-updated{font-size:10px;color:var(--text-2);white-space:nowrap}
+#market-status{font-size:11px;white-space:nowrap;letter-spacing:.04em;margin-top:5px}
+#market-status.open{color:var(--green)}
+#market-status.closed{color:var(--text)}
 
-/* ── Tab Bar — VS Code editor tabs ─────────────────────────────────────────── */
+/* ── Tab Bar — dropdown groups ──────────────────────────────────────────────── */
 #tab-bar{
   display:flex;align-items:stretch;
   border-bottom:1px solid var(--border);flex-shrink:0;
 }
+.tab-group{position:relative}
 .tab-btn{
-  padding:0 18px;height:37px;border:none;
+  padding:0 20px;height:37px;border:none;
   border-right:1px solid var(--border);
   border-top:2px solid transparent;
   background:var(--bg2);color:var(--text-2);
   cursor:pointer;font-family:var(--mono);font-size:11px;
   transition:background .12s,color .12s;white-space:nowrap;
-  display:flex;align-items:center;gap:6px;
+  display:flex;align-items:center;gap:7px;
 }
 .tab-btn:hover{background:rgba(40,44,52,.6);color:var(--text)}
 .tab-btn.active{
@@ -286,6 +294,25 @@ html,body{height:100%;background:var(--body-bg);color:var(--text);font-family:va
   border-top-color:var(--blue);border-bottom:1px solid var(--surface);
   margin-bottom:-1px;
 }
+.tg-arrow{font-size:9px;opacity:.6;transition:transform .15s}
+.tab-group.open .tg-arrow{transform:rotate(180deg)}
+.tab-dropdown{
+  display:none;position:absolute;top:100%;left:0;z-index:200;
+  min-width:150px;flex-direction:column;
+  background:var(--bg2);border:1px solid var(--border);
+  border-top:none;box-shadow:0 6px 16px rgba(0,0,0,.35);
+}
+.tab-group.open .tab-dropdown{display:flex}
+.tab-sub-btn{
+  padding:9px 18px;border:none;border-bottom:1px solid var(--border2);
+  background:transparent;color:var(--text-2);
+  cursor:pointer;font-family:var(--mono);font-size:11px;
+  text-align:left;white-space:nowrap;
+  transition:background .1s,color .1s;
+}
+.tab-sub-btn:last-child{border-bottom:none}
+.tab-sub-btn:hover{background:var(--surface);color:var(--text)}
+.tab-sub-btn.active{color:var(--blue)}
 
 /* ── App Layout ────────────────────────────────────────────────────────────── */
 /* position:fixed + transform-scale zoom: elements outside #app are unaffected */
@@ -317,6 +344,29 @@ td:first-child{text-align:left}
 .sym{font-weight:600;color:var(--blue);font-size:13px}
 .sym-name{font-size:10px;color:var(--text-2);display:block;font-weight:400;margin-top:1px}
 .price{color:var(--text);font-variant-numeric:tabular-nums}
+
+/* ── Symbol cell: logo + folded-corner flag ──────────────────────────────── */
+.sym-cell{position:relative}
+.sym-cell-inner{display:flex;align-items:center;gap:9px;padding-left:4px}
+.sym-logo{width:24px;height:24px;border-radius:50%;object-fit:contain;background:var(--surface);border:1px solid var(--border2);flex-shrink:0}
+.sym-logo-fb{width:24px;height:24px;border-radius:50%;background:var(--sel);color:var(--text);font-size:10px;font-weight:700;display:none;align-items:center;justify-content:center;flex-shrink:0}
+/* Folded corner triangle (CSS border trick — zero-size box, borders form triangle) */
+.row-flag{position:absolute;top:0;left:0;width:0;height:0;border-style:solid;border-width:17px 17px 0 0;border-color:transparent transparent transparent transparent;cursor:pointer;z-index:2;transition:border-color .12s}
+tbody tr:hover .row-flag.flag-none{border-color:var(--border2) transparent transparent transparent}
+.row-flag.flag-red   {border-color:#e8787f transparent transparent transparent}
+.row-flag.flag-orange{border-color:#d4845a transparent transparent transparent}
+.row-flag.flag-yellow{border-color:#edca80 transparent transparent transparent}
+.row-flag.flag-green {border-color:#a3d182 transparent transparent transparent}
+.row-flag.flag-blue  {border-color:#6dbeff transparent transparent transparent}
+.row-flag.flag-purple{border-color:#d080ee transparent transparent transparent}
+.row-flag.flag-cyan  {border-color:#5ec8d5 transparent transparent transparent}
+
+/* ── Flag color picker popover ───────────────────────────────────────────── */
+#flag-picker{position:fixed;display:none;gap:6px;padding:8px 10px;background:var(--card);border:1px solid var(--border2);border-radius:6px;z-index:3000;box-shadow:0 6px 24px rgba(0,0,0,.55);align-items:center}
+.fp-swatch{width:18px;height:18px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform .12s,border-color .12s;flex-shrink:0}
+.fp-swatch:hover{transform:scale(1.25);border-color:rgba(255,255,255,.5)}
+.fp-clear{width:18px;height:18px;border-radius:50%;cursor:pointer;background:var(--surface);border:1px dashed var(--border2);display:flex;align-items:center;justify-content:center;color:var(--text-3);font-size:11px;transition:all .12s;flex-shrink:0}
+.fp-clear:hover{color:var(--text);border-color:var(--text-2)}
 .chg-up{color:var(--green)}
 .chg-dn{color:var(--red)}
 .neutral-val{color:var(--text-2)}
@@ -630,8 +680,8 @@ input[type=range]::-webkit-slider-thumb{
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
 ::-webkit-scrollbar-thumb:hover{background:var(--sel)}
 
-/* ── Auto-refresh countdown ─────────────────────────────────────────────────── */
-#refresh-countdown{font-size:10px;color:var(--text-2);white-space:nowrap;font-variant-numeric:tabular-nums}
+/* ── Auto-refresh countdown circle ─────────────────────────────────────────── */
+#refresh-countdown{display:none;opacity:.75;flex-shrink:0}
 
 /* ── Update banner ──────────────────────────────────────────────────────────── */
 #update-banner{
@@ -654,6 +704,15 @@ input[type=range]::-webkit-slider-thumb{
 .alloc-toggle-btn.active{background:var(--blue-dim);color:var(--blue);border-color:rgba(97,175,239,.35)}
 
 /* ── History panel ──────────────────────────────────────────────────────────── */
+/* ── Dividends tab ──────────────────────────────────────────────────────────── */
+.div-summary-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.div-stat{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:13px 16px}
+.div-stat-label{font-size:9px;color:var(--text-2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px}
+.div-stat-val{font-size:18px;font-weight:600;color:var(--text);font-variant-numeric:tabular-nums}
+.div-freq{font-size:9px;letter-spacing:.05em;text-transform:uppercase;padding:1px 5px;border-radius:2px;background:var(--blue-dim);color:var(--blue)}
+.div-next{font-size:11px;color:var(--text-2)}
+#div-table th,#div-table td{font-size:11px}
+
 .history-chart-card{border:1px solid var(--border);border-radius:4px;padding:16px;margin-bottom:14px}
 .history-chart-wrap{height:280px;position:relative}
 .history-stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:14px}
@@ -783,6 +842,12 @@ input[type=range]::-webkit-slider-thumb{
 }
 tbody tr:hover .row-edit-btn{opacity:1}
 .row-edit-btn:hover{color:var(--blue)}
+.drip-toggle{
+  padding:2px 6px;border:1px solid var(--border2);border-radius:3px;
+  background:transparent;color:var(--text-3);cursor:pointer;
+  font-family:var(--mono);font-size:9px;letter-spacing:.04em;transition:all .15s;
+}
+.drip-toggle.drip-on{background:var(--green-dim);color:var(--green);border-color:var(--green)}
 
 /* ── Settings gear button & modal (zoom-immune: outside #app) ───────────────── */
 #settings-gear{
@@ -815,6 +880,8 @@ tbody tr:hover .row-edit-btn{opacity:1}
 .zoom-preset-btn:hover{background:var(--sel);color:var(--text)}
 .zoom-preset-btn.active{background:var(--blue-dim);color:var(--blue);border-color:rgba(97,175,239,.3)}
 .sp-sep{height:1px;background:var(--border2);margin:18px 0}
+.sp-version-row{display:flex;align-items:center;gap:10px;margin-top:16px;flex-wrap:wrap}
+.sp-version-label{font-size:10px;color:var(--text-3);letter-spacing:.04em;flex:1}
 .theme-row{display:flex;gap:8px;margin-top:10px}
 .theme-btn{
   flex:1;display:flex;flex-direction:column;align-items:center;gap:7px;
@@ -997,7 +1064,12 @@ tbody tr:hover .row-edit-btn{opacity:1}
         </svg>
         Edit Holdings
       </button>
-      <span id="refresh-countdown"></span>
+      <svg id="refresh-countdown" width="16" height="16" viewBox="0 0 16 16">
+        <circle cx="8" cy="8" r="6" fill="none" stroke="var(--border2)" stroke-width="2"/>
+        <circle id="rc-arc" cx="8" cy="8" r="6" fill="none" stroke="var(--blue)" stroke-width="2"
+          stroke-dasharray="37.7" stroke-dashoffset="37.7"
+          stroke-linecap="round" transform="rotate(-90 8 8)"/>
+      </svg>
       <button id="refresh-btn" onclick="fetchPrices()">
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <path d="M1 4v6h6"/><path d="M23 20v-6h-6"/>
@@ -1010,16 +1082,32 @@ tbody tr:hover .row-edit-btn{opacity:1}
 
   <!-- ── Tab Bar ────────────────────────────────────────────────────────────── -->
   <div id="tab-bar">
-    <button class="tab-btn active" onclick="switchTab('portfolio')">HOLDINGS</button>
-    <button class="tab-btn"        onclick="switchTab('trade')">BUY / SELL</button>
-    <button class="tab-btn"        onclick="switchTab('add-calc')">ADD CALC</button>
-    <button class="tab-btn"        onclick="switchTab('earnings')">EARNINGS</button>
-    <button class="tab-btn"        onclick="switchTab('concentration')">CONCENTRATION</button>
-    <button class="tab-btn"        onclick="switchTab('dip')">DIP ALERTS</button>
-    <button class="tab-btn"        onclick="switchTab('heatmap')">MARKET HEATMAP</button>
-    <button class="tab-btn"        onclick="switchTab('history')">HISTORY</button>
-    <button class="tab-btn"        onclick="switchTab('news')">NEWS</button>
-    <button class="tab-btn"        onclick="switchTab('alerts')">PRICE ALERTS</button>
+    <div class="tab-group" id="tg-portfolio">
+      <button class="tab-btn active" onclick="toggleTabGroup('portfolio')">PORTFOLIO <span class="tg-arrow">▾</span></button>
+      <div class="tab-dropdown">
+        <button class="tab-sub-btn active" data-tab="portfolio"     onclick="switchTab('portfolio')">HOLDINGS</button>
+        <button class="tab-sub-btn"        data-tab="history"       onclick="switchTab('history')">HISTORY</button>
+        <button class="tab-sub-btn"        data-tab="dividends"     onclick="switchTab('dividends')">DIVIDENDS</button>
+        <button class="tab-sub-btn"        data-tab="news"          onclick="switchTab('news')">NEWS</button>
+      </div>
+    </div>
+    <div class="tab-group" id="tg-trade">
+      <button class="tab-btn" onclick="toggleTabGroup('trade')">TRADE <span class="tg-arrow">▾</span></button>
+      <div class="tab-dropdown">
+        <button class="tab-sub-btn" data-tab="trade"    onclick="switchTab('trade')">BUY / SELL</button>
+        <button class="tab-sub-btn" data-tab="add-calc" onclick="switchTab('add-calc')">ADD CALC</button>
+        <button class="tab-sub-btn" data-tab="alerts"   onclick="switchTab('alerts')">PRICE ALERTS</button>
+      </div>
+    </div>
+    <div class="tab-group" id="tg-analysis">
+      <button class="tab-btn" onclick="toggleTabGroup('analysis')">ANALYSIS <span class="tg-arrow">▾</span></button>
+      <div class="tab-dropdown">
+        <button class="tab-sub-btn" data-tab="earnings"      onclick="switchTab('earnings')">EARNINGS</button>
+        <button class="tab-sub-btn" data-tab="concentration" onclick="switchTab('concentration')">CONCENTRATION</button>
+        <button class="tab-sub-btn" data-tab="dip"           onclick="switchTab('dip')">DIP ALERTS</button>
+        <button class="tab-sub-btn" data-tab="heatmap"       onclick="switchTab('heatmap')">MARKET HEATMAP</button>
+      </div>
+    </div>
   </div>
 
   <!-- ── Update banner ────────────────────────────────────────────────────── -->
@@ -1049,6 +1137,7 @@ tbody tr:hover .row-edit-btn{opacity:1}
           <div class="pc-meta">
             <div class="pc-big-val" id="pc-val">—</div>
             <div class="pc-change-row" id="pc-chg"></div>
+            <div id="market-status"></div>
           </div>
           <div class="pc-controls">
             <div class="pc-period-group">
@@ -1108,6 +1197,7 @@ tbody tr:hover .row-edit-btn{opacity:1}
               <th onclick="sortTable('portfolioWeight')" data-col="portfolioWeight">WEIGHT <span class="sort-icon">▲</span></th>
               <th onclick="sortTable('totalGain')"       data-col="totalGain">   GAIN/LOSS <span class="sort-icon">▲</span></th>
               <th>SECTOR</th>
+              <th style="width:52px">DRIP</th>
               <th style="width:28px"></th>
             </tr>
           </thead>
@@ -1441,6 +1531,46 @@ tbody tr:hover .row-edit-btn{opacity:1}
       </div>
     </div>
 
+    <!-- ━━━ PANEL: DIVIDENDS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <div id="panel-dividends" class="tab-panel">
+      <div class="panel-header">
+        <div>
+          <div class="chart-title" style="font-size:12px;margin-bottom:4px">DIVIDEND INCOME</div>
+          <div style="font-size:11px;color:var(--text-3)">Trailing 12-month actuals &amp; growth vs. prior year from Yahoo Finance.</div>
+        </div>
+        <button class="tool-btn" onclick="loadDividends(true)">↻ REFRESH</button>
+      </div>
+
+      <div class="div-summary-row" id="div-summary-row">
+        <div class="div-stat"><div class="div-stat-label">ANNUAL INCOME</div><div class="div-stat-val" id="div-annual-income">—</div></div>
+        <div class="div-stat"><div class="div-stat-label">PORTFOLIO YIELD</div><div class="div-stat-val" id="div-yield">—</div></div>
+        <div class="div-stat"><div class="div-stat-label">AVG DIV GROWTH</div><div class="div-stat-val" id="div-growth-avg">—</div></div>
+        <div class="div-stat"><div class="div-stat-label">PAYERS</div><div class="div-stat-val" id="div-payers">—</div></div>
+      </div>
+
+      <div class="chart-card" style="padding:16px 20px;margin-bottom:14px">
+        <div style="font-size:10px;color:var(--text-2);letter-spacing:.06em;margin-bottom:10px">QUARTERLY DIVIDEND INCOME</div>
+        <div style="height:150px;position:relative"><canvas id="div-chart"></canvas></div>
+      </div>
+
+      <div class="table-wrap">
+        <table id="div-table">
+          <thead><tr>
+            <th>SYMBOL</th>
+            <th>SHARES</th>
+            <th>DIV / SHARE</th>
+            <th>ANNUAL INCOME</th>
+            <th>YIELD</th>
+            <th>YoY GROWTH</th>
+            <th>FREQUENCY</th>
+            <th>NEXT EST.</th>
+            <th>DRIP</th>
+          </tr></thead>
+          <tbody id="div-tbody"><tr><td colspan="9" style="text-align:center;color:var(--text-3);padding:30px">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- ━━━ PANEL: NEWS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
     <div id="panel-news" class="tab-panel">
       <div class="panel-header">
@@ -1506,6 +1636,18 @@ tbody tr:hover .row-edit-btn{opacity:1}
   </svg>
 </button>
 
+<!-- ── Flag color picker ─────────────────────────────────────────────────────── -->
+<div id="flag-picker">
+  <div class="fp-clear"   onclick="setHoldingFlag(_fpSym(),null)"     title="Clear flag">✕</div>
+  <div class="fp-swatch"  onclick="setHoldingFlag(_fpSym(),'red')"    title="Red"    style="background:#e8787f"></div>
+  <div class="fp-swatch"  onclick="setHoldingFlag(_fpSym(),'orange')" title="Orange" style="background:#d4845a"></div>
+  <div class="fp-swatch"  onclick="setHoldingFlag(_fpSym(),'yellow')" title="Yellow" style="background:#edca80"></div>
+  <div class="fp-swatch"  onclick="setHoldingFlag(_fpSym(),'green')"  title="Green"  style="background:#a3d182"></div>
+  <div class="fp-swatch"  onclick="setHoldingFlag(_fpSym(),'blue')"   title="Blue"   style="background:#6dbeff"></div>
+  <div class="fp-swatch"  onclick="setHoldingFlag(_fpSym(),'purple')" title="Purple" style="background:#d080ee"></div>
+  <div class="fp-swatch"  onclick="setHoldingFlag(_fpSym(),'cyan')"   title="Cyan"   style="background:#5ec8d5"></div>
+</div>
+
 <!-- ── Settings Modal ────────────────────────────────────────────────────────── -->
 <div id="settings-backdrop" style="display:none" onclick="toggleSettings()">
   <div id="settings-panel" onclick="event.stopPropagation()">
@@ -1549,6 +1691,17 @@ tbody tr:hover .row-edit-btn{opacity:1}
             style="width:100%;text-align:center;letter-spacing:.04em">
       ▶ Launch Walkthrough
     </button>
+    <div class="sp-sep"></div>
+    <button class="tool-btn danger" onclick="confirmResetPortfolio()"
+            style="width:100%;text-align:center;letter-spacing:.04em">
+      Reset Portfolio
+    </button>
+    <div class="sp-version-row">
+      <span class="sp-version-label">Argus <span id="sp-ver-num">v—</span></span>
+      <button class="tool-btn" id="sp-update-btn" onclick="checkForUpdatesNow()"
+              style="padding:4px 12px;font-size:9px">Check for Updates</button>
+      <span id="sp-update-note" style="font-size:10px;color:var(--text-3)"></span>
+    </div>
   </div>
 </div>
 
@@ -1772,7 +1925,7 @@ let portfolioData  = null;
 let allocChart     = null;
 let sectorChart    = null;
 let historyChart   = null;
-let sortCol        = 'portfolioWeight';
+let sortCol        = 'currentValue';
 let sortDir        = -1;
 let acCurrentPrice = null;
 let acSymbol       = null;
@@ -1790,7 +1943,7 @@ let _firedAlerts   = new Set();  // prevent repeat notifications per session
 // ── Formatters ─────────────────────────────────────────────────────────────────
 const fmt$ = (n, d=2) =>
   n == null ? '—' : (n < 0 ? '-$' : '$') + Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
-const fmt$0 = n => fmt$(n, 0);
+const fmt$0 = n => fmt$(n, 2);
 const fmtPct = (n, d=2) =>
   n == null ? '—' : (n >= 0 ? '+' : '') + n.toFixed(d) + '%';
 const fmtShares = n => n == null ? '—' : n.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 });
@@ -1798,14 +1951,39 @@ const fmtShares = n => n == null ? '—' : n.toLocaleString('en-US', { minimumFr
 function clsPN(n) { return n > 0 ? 'chg-up' : n < 0 ? 'chg-dn' : 'neutral-val'; }
 
 // ── Tab switching ──────────────────────────────────────────────────────────────
+const _tabGroupMap = {
+  portfolio:'portfolio', history:'portfolio', dividends:'portfolio', news:'portfolio',
+  trade:'trade', 'add-calc':'trade', alerts:'trade',
+  earnings:'analysis', concentration:'analysis', dip:'analysis', heatmap:'analysis',
+};
+
+function closeTabDropdowns() {
+  document.querySelectorAll('.tab-group').forEach(g => g.classList.remove('open'));
+}
+
+function toggleTabGroup(group) {
+  const el = document.getElementById('tg-' + group);
+  const wasOpen = el.classList.contains('open');
+  closeTabDropdowns();
+  if (!wasOpen) el.classList.add('open');
+}
+
 function switchTab(tab) {
   activeTab = tab;
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('panel-' + tab).classList.add('active');
-  const btns = document.querySelectorAll('.tab-btn');
-  const tabOrder = ['portfolio','trade','add-calc','earnings','concentration','dip','heatmap','history','news','alerts'];
-  btns[tabOrder.indexOf(tab)].classList.add('active');
+
+  // Sub-button active state
+  document.querySelectorAll('.tab-sub-btn').forEach(b => b.classList.remove('active'));
+  const subBtn = document.querySelector(`.tab-sub-btn[data-tab="${tab}"]`);
+  if (subBtn) subBtn.classList.add('active');
+
+  // Group button active state
+  document.querySelectorAll('.tab-group > .tab-btn').forEach(b => b.classList.remove('active'));
+  const groupBtn = document.querySelector(`#tg-${_tabGroupMap[tab]} > .tab-btn`);
+  if (groupBtn) groupBtn.classList.add('active');
+
+  closeTabDropdowns();
 
   // Lazy render tabs when first visited
   if (tab === 'portfolio' && _pcSnaps.length)    renderPortfolioChart();
@@ -1814,6 +1992,7 @@ function switchTab(tab) {
   if (tab === 'trade'                          ) initTradePanel();
   if (tab === 'add-calc'                       ) initAddCalc();
   if (tab === 'history'                        ) loadHistory();
+  if (tab === 'dividends'                      ) loadDividends(false);
   if (tab === 'heatmap' && !document.getElementById('hm-map').hasChildNodes()) loadHeatmap();
   if (tab === 'news'           && !newsLoaded  ) loadNews(false);
   if (tab === 'alerts'                         ) loadAlertsList();
@@ -1827,6 +2006,70 @@ function sortTable(col) {
     th.classList.toggle('sorted', th.dataset.col === col);
   });
   if (portfolioData) renderTable(portfolioData.holdings);
+}
+
+// ── Row flag (colored folded corner) ──────────────────────────────────────────
+function _fpSym() { return document.getElementById('flag-picker').dataset.symbol || ''; }
+
+function openFlagPicker(symbol, event) {
+  event.stopPropagation();
+  const picker = document.getElementById('flag-picker');
+  picker.dataset.symbol = symbol;
+  picker.style.display = 'flex';
+  picker.style.left = event.clientX + 'px';
+  picker.style.top  = (event.clientY + 6) + 'px';
+  requestAnimationFrame(() => {
+    const r = picker.getBoundingClientRect();
+    if (r.right  > window.innerWidth  - 8) picker.style.left = (window.innerWidth  - r.width  - 8) + 'px';
+    if (r.bottom > window.innerHeight - 8) picker.style.top  = (event.clientY - r.height - 6)       + 'px';
+  });
+}
+
+async function setHoldingFlag(symbol, color) {
+  document.getElementById('flag-picker').style.display = 'none';
+  if (!symbol) return;
+  try {
+    const r = await fetch(`/api/holdings/${encodeURIComponent(symbol)}/flag`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ flagColor: color || null }),
+    });
+    if (!r.ok) return;
+    if (portfolioData?.holdings) {
+      const h = portfolioData.holdings.find(h => h.symbol === symbol);
+      if (h) h.flagColor = color || null;
+      renderTable(portfolioData.holdings);
+    }
+  } catch {}
+}
+
+document.addEventListener('click', () => {
+  document.getElementById('flag-picker').style.display = 'none';
+});
+
+// ── DRIP toggle ────────────────────────────────────────────────────────────────
+async function toggleDrip(symbol, currentDrip) {
+  const newVal = !currentDrip;
+  try {
+    const r = await fetch(`/api/holdings/${encodeURIComponent(symbol)}/drip`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ drip: newVal }),
+    });
+    if (!r.ok) return;
+    if (portfolioData?.holdings) {
+      const h = portfolioData.holdings.find(h => h.symbol === symbol);
+      if (h) h.drip = newVal;
+      renderTable(portfolioData.holdings);
+    }
+    if (_divData) {
+      const h = _divData.holdings.find(h => h.symbol === symbol);
+      if (h) h.drip = newVal;
+      renderDividends(_divData);
+    }
+    _pcSnaps = [];
+    loadPortfolioChart();
+  } catch {}
 }
 
 // ── Fetch prices ───────────────────────────────────────────────────────────────
@@ -1886,10 +2129,10 @@ function renderHeader(s) {
   totalEl.textContent = fmt$0(s.totalValue);
   totalEl.className   = 'stat-value neutral';
 
-  todayEl.textContent = `${fmt$(s.totalDailyPnL,0)} (${fmtPct(s.totalDailyPnLPct)})`;
+  todayEl.textContent = `${fmt$(s.totalDailyPnL,2)} (${fmtPct(s.totalDailyPnLPct)})`;
   todayEl.className   = 'stat-value ' + (s.totalDailyPnL >= 0 ? 'up' : 'dn');
 
-  gainEl.textContent  = `${fmt$(s.totalGain,0)} (${fmtPct(s.totalGainPct)})`;
+  gainEl.textContent  = `${fmt$(s.totalGain,2)} (${fmtPct(s.totalGainPct)})`;
   gainEl.className    = 'stat-value ' + (s.totalGain >= 0 ? 'up' : 'dn');
 }
 
@@ -1906,16 +2149,26 @@ function renderTable(holdings) {
     const w    = h.portfolioWeight ?? h.weight ?? 0;
     const barW = Math.max(2, Math.min(120, w * 2));
     const have = h.price != null;
+    const flagCls = h.flagColor ? 'flag-' + h.flagColor : 'flag-none';
+    const sym = escHtml(h.symbol);
     return `
     <tr>
-      <td>
-        <span class="sym">${escHtml(h.symbol)}</span>
-        <span class="sym-name">${escHtml(h.name)}</span>
+      <td class="sym-cell">
+        <div class="row-flag ${flagCls}" onclick="openFlagPicker('${sym}',event)" title="Flag this holding"></div>
+        <div class="sym-cell-inner">
+          <img class="sym-logo" src="https://assets.parqet.com/logos/symbol/${sym}?format=png"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" alt="" loading="lazy">
+          <div class="sym-logo-fb">${sym[0]}</div>
+          <div>
+            <span class="sym">${sym}</span>
+            <span class="sym-name">${escHtml(h.name)}</span>
+          </div>
+        </div>
       </td>
       <td class="price">${have ? fmt$(h.price) : '—'}</td>
       <td class="${clsPN(h.change)}">${have ? fmt$(h.change) : '—'}</td>
       <td class="${clsPN(h.changePct)}">${have ? fmtPct(h.changePct) : '—'}</td>
-      <td class="${have ? clsPN(h.dailyPnL) : 'neutral-val'}">${have ? fmt$(h.dailyPnL, 0) : '—'}</td>
+      <td class="${have ? clsPN(h.dailyPnL) : 'neutral-val'}">${have ? fmt$(h.dailyPnL, 2) : '—'}</td>
       <td class="price">${fmt$0(h.currentValue)}</td>
       <td>
         <div class="weight-bar-wrap">
@@ -1924,10 +2177,13 @@ function renderTable(holdings) {
         </div>
       </td>
       <td class="${have ? clsPN(h.totalGain) : 'neutral-val'}">
-        ${have ? fmt$(h.totalGain,0) : '—'}
+        ${have ? fmt$(h.totalGain,2) : '—'}
         ${have ? `<span style="font-size:10px;opacity:.7"> (${fmtPct(h.totalGainPct)})</span>` : ''}
       </td>
       <td><span class="badge-sector">${escHtml(h.sector)}</span></td>
+      <td><button class="drip-toggle ${h.drip ? 'drip-on' : ''}"
+        onclick="toggleDrip('${escHtml(h.symbol)}',${!!h.drip})"
+        title="${h.drip ? 'DRIP on — dividends auto-reinvested. Click to disable.' : 'Enable dividend reinvestment (DRIP)'}">DRIP</button></td>
       <td><button class="row-edit-btn" onclick="openEditModal('${escHtml(h.symbol)}')" title="Edit position">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
@@ -2154,7 +2410,7 @@ function calcAdd() {
   document.getElementById('acr-weight-vs').textContent   = prevShares ? `vs. prev ${prevWeight.toFixed(2)}%` : '';
 
   const gainEl = document.getElementById('acr-gain');
-  gainEl.textContent = `${fmt$(gainAbs, 0)} (${fmtPct(gainPct)})`;
+  gainEl.textContent = `${fmt$(gainAbs, 2)} (${fmtPct(gainPct)})`;
   gainEl.className   = 'result-value ' + clsPN(gainPct);
 }
 
@@ -2757,9 +3013,11 @@ function startAutoRefresh() {
   stopAutoRefresh();
   autoRefreshSecs = AUTO_REFRESH_INTERVAL;
   updateAutoRefreshDisplay();
+  updateMarketStatus();
   autoRefreshTimer = setInterval(() => {
     autoRefreshSecs--;
     updateAutoRefreshDisplay();
+    if (autoRefreshSecs % 60 === 0) updateMarketStatus();
     if (autoRefreshSecs <= 0) {
       stopAutoRefresh();
       fetchPrices();
@@ -2771,12 +3029,58 @@ function stopAutoRefresh() {
   if (autoRefreshTimer) { clearInterval(autoRefreshTimer); autoRefreshTimer = null; }
 }
 
-function updateAutoRefreshDisplay() {
-  const el = document.getElementById('refresh-countdown');
-  if (autoRefreshSecs > 0) {
-    el.textContent = `Auto in ${autoRefreshSecs}s`;
+function updateMarketStatus() {
+  const el = document.getElementById('market-status');
+  if (!el) return;
+  const now = new Date();
+  // Convert to US Eastern (ET = UTC-5 standard, UTC-4 daylight)
+  const etOffset = (() => {
+    const jan = new Date(now.getFullYear(), 0, 1).getTimezoneOffset();
+    const jul = new Date(now.getFullYear(), 6, 1).getTimezoneOffset();
+    const dstOffset = Math.min(jan, jul);
+    // Approximate DST: ET is UTC-4 in summer, UTC-5 in winter
+    const stdOffset = -300; // UTC-5 in minutes
+    const dstActive = now.getTimezoneOffset() === dstOffset;
+    return dstActive ? -240 : -300;
+  })();
+  const utcMs = now.getTime() + now.getTimezoneOffset() * 60000;
+  const et = new Date(utcMs + etOffset * 60000);
+  const day = et.getDay(); // 0=Sun, 6=Sat
+  const mins = et.getHours() * 60 + et.getMinutes();
+  const OPEN = 9 * 60 + 30;   // 9:30 ET
+  const CLOSE = 16 * 60;      // 16:00 ET
+  const isWeekday = day >= 1 && day <= 5;
+  const isOpen = isWeekday && mins >= OPEN && mins < CLOSE;
+
+  if (isOpen) {
+    const minsLeft = CLOSE - mins;
+    el.className = 'open';
+    el.textContent = `MARKET OPEN · closes in ${minsLeft}m`;
   } else {
-    el.textContent = '';
+    // Time until next open
+    let minsUntil;
+    if (isWeekday && mins < OPEN) {
+      minsUntil = OPEN - mins;
+    } else {
+      const daysUntilMon = day === 0 ? 1 : day === 6 ? 2 : (8 - day) % 7 || 7;
+      const nextDayMins = day >= 1 && day <= 5 ? (24 * 60 - mins + OPEN) : (daysUntilMon - 1) * 24 * 60 + (24 * 60 - mins + OPEN);
+      minsUntil = day >= 1 && day <= 4 && mins >= CLOSE ? 24 * 60 - mins + OPEN : nextDayMins;
+    }
+    const h = Math.floor(minsUntil / 60), m = minsUntil % 60;
+    el.className = 'closed';
+    el.textContent = `MARKET CLOSED · opens in ${h}h ${m}m`;
+  }
+}
+
+function updateAutoRefreshDisplay() {
+  const el  = document.getElementById('refresh-countdown');
+  const arc = document.getElementById('rc-arc');
+  if (autoRefreshSecs > 0) {
+    el.style.display = 'block';
+    const circ = 37.7;
+    arc.style.strokeDashoffset = circ * (autoRefreshSecs / AUTO_REFRESH_INTERVAL);
+  } else {
+    el.style.display = 'none';
   }
 }
 
@@ -2832,7 +3136,7 @@ function renderHistoryStats() {
     </div>
     <div class="history-stat-card">
       <div class="hs-label">Total Change</div>
-      <div class="hs-value ${gain >= 0 ? 'chg-up' : 'chg-dn'}">${fmt$(gain, 0)}</div>
+      <div class="hs-value ${gain >= 0 ? 'chg-up' : 'chg-dn'}">${fmt$(gain, 2)}</div>
       <div class="hs-sub">${fmtPct(gainPct)} since first snapshot</div>
     </div>
     <div class="history-stat-card">
@@ -2925,6 +3229,118 @@ function renderHistoryChart() {
       animation: { duration: 400 }
     }
   });
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// DIVIDENDS TAB
+// ══════════════════════════════════════════════════════════════════════════════
+let _divChart = null;
+let _divData  = null;
+
+async function loadDividends(forceRefresh) {
+  if (_divData && !forceRefresh) { renderDividends(_divData); return; }
+  document.getElementById('div-tbody').innerHTML =
+    '<tr><td colspan="9" style="text-align:center;color:var(--text-3);padding:30px">Loading…</td></tr>';
+  try {
+    const r = await fetch('/api/dividends');
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    _divData = await r.json();
+    renderDividends(_divData);
+  } catch (e) {
+    document.getElementById('div-tbody').innerHTML =
+      `<tr><td colspan="9" style="text-align:center;color:var(--red);padding:30px">${escHtml(e.message)}</td></tr>`;
+  }
+}
+
+function renderDividends(data) {
+  const { summary, holdings } = data;
+
+  // Summary stats
+  document.getElementById('div-annual-income').textContent =
+    summary.totalAnnualIncome > 0 ? fmt$0(summary.totalAnnualIncome) : '—';
+  document.getElementById('div-yield').textContent =
+    summary.portfolioYield > 0 ? fmtPct(summary.portfolioYield) : '—';
+  const growthEl = document.getElementById('div-growth-avg');
+  if (summary.avgGrowth !== null) {
+    growthEl.textContent = (summary.avgGrowth >= 0 ? '+' : '') + summary.avgGrowth.toFixed(1) + '%';
+    growthEl.className   = 'div-stat-val ' + (summary.avgGrowth >= 0 ? 'pos-val' : 'neg-val');
+  } else {
+    growthEl.textContent = '—';
+    growthEl.className   = 'div-stat-val';
+  }
+  document.getElementById('div-payers').textContent =
+    `${summary.payingCount} / ${summary.totalCount}`;
+
+  // Quarterly income bar chart
+  const qData = summary.quarterlyIncome || {};
+  const qKeys = Object.keys(qData).sort().slice(-8);
+  const qVals = qKeys.map(k => +qData[k].toFixed(2));
+  const qLabels = qKeys.map(k => {
+    const [y, q] = k.split('-');
+    return q + ' \'' + y.slice(2);
+  });
+  const ctx = document.getElementById('div-chart').getContext('2d');
+  if (_divChart) _divChart.destroy();
+  _divChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: qLabels,
+      datasets: [{
+        data: qVals,
+        backgroundColor: 'rgba(109,190,255,.35)',
+        borderColor: 'rgba(109,190,255,.8)',
+        borderWidth: 1,
+        borderRadius: 2,
+      }],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#162133', borderColor: 'rgba(38,80,130,.5)', borderWidth: 1,
+          titleColor: '#8fa3bf', bodyColor: '#dde4f0',
+          callbacks: { label: c => ' ' + fmt$0(c.parsed.y) },
+        },
+      },
+      scales: {
+        x: { ticks: { color: '#4a6080', font: { family: 'monospace', size: 10 } }, grid: { color: 'rgba(38,80,130,.1)' }, border: { color: 'rgba(38,80,130,.3)' } },
+        y: { ticks: { color: '#4a6080', font: { family: 'monospace', size: 10 }, callback: v => '$' + v.toFixed(0) }, grid: { color: 'rgba(38,80,130,.1)' }, border: { color: 'rgba(38,80,130,.3)' } },
+      },
+      animation: { duration: 300 },
+    },
+  });
+
+  // Per-holding table
+  const paying = holdings.filter(h => h.trailingAnnualDiv > 0)
+    .sort((a, b) => b.annualIncome - a.annualIncome);
+  const nonPaying = holdings.filter(h => h.trailingAnnualDiv === 0);
+  const sorted = [...paying, ...nonPaying];
+
+  const today = new Date().toISOString().split('T')[0];
+
+  document.getElementById('div-tbody').innerHTML = sorted.map(h => {
+    const hasDrip = h.drip;
+    const growthTxt = h.growth !== null
+      ? `<span class="${h.growth >= 0 ? 'pos-val' : 'neg-val'}">${h.growth >= 0 ? '+' : ''}${h.growth.toFixed(1)}%</span>` : '—';
+    const freqTxt = h.frequency
+      ? `<span class="div-freq">${h.frequency}</span>` : '—';
+    const nextTxt = h.nextEstDate
+      ? `<span class="div-next ${h.nextEstDate <= today ? 'pos-val' : ''}">${h.nextEstDate}</span>` : '—';
+    return `<tr>
+      <td><span class="sym">${escHtml(h.symbol)}</span><span class="sym-name">${escHtml(h.name)}</span></td>
+      <td>${h.shares.toFixed(4)}</td>
+      <td>${h.trailingAnnualDiv > 0 ? fmt$(h.trailingAnnualDiv, 4) : '—'}</td>
+      <td>${h.annualIncome > 0 ? fmt$0(h.annualIncome) : '—'}</td>
+      <td>${h.yield !== null ? fmtPct(h.yield) : '—'}</td>
+      <td>${growthTxt}</td>
+      <td>${freqTxt}</td>
+      <td>${nextTxt}</td>
+      <td><button class="drip-toggle ${hasDrip ? 'drip-on' : ''}"
+        onclick="toggleDrip('${escHtml(h.symbol)}',${hasDrip})"
+        title="${hasDrip ? 'DRIP on — click to disable' : 'Enable DRIP'}">DRIP</button></td>
+    </tr>`;
+  }).join('');
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -3144,22 +3560,35 @@ function _pcFilter(snaps) {
   return snaps.filter(s => s.date >= cutStr);
 }
 
+function _isoWeekKey(d) {
+  const dt = new Date(d + 'T12:00:00Z');
+  const day = dt.getUTCDay() || 7;
+  dt.setUTCDate(dt.getUTCDate() + 4 - day);
+  const y = dt.getUTCFullYear();
+  const wk = Math.ceil(((dt - new Date(Date.UTC(y, 0, 1))) / 864e5 + 1) / 7);
+  return `${y}-W${String(wk).padStart(2, '0')}`;
+}
+
 function _pcBuildOHLC(snaps) {
   if (!snaps.length) return [];
-  // Choose grouping by actual calendar period so O/H/L/C have real spread
-  const spanDays = (new Date(snaps[snaps.length-1].date) - new Date(snaps[0].date)) / 864e5;
-  const getKey = spanDays <= 35
-    ? d => d                        // ≤1 month  → daily candles
-    : spanDays <= 200
-      ? d => {                      // ≤6 months → weekly candles
-          const dt = new Date(d + 'T12:00:00Z');
-          const day = dt.getUTCDay() || 7;
-          dt.setUTCDate(dt.getUTCDate() + 4 - day);
-          const y = dt.getUTCFullYear();
-          const wk = Math.ceil(((dt - new Date(Date.UTC(y,0,1))) / 864e5 + 1) / 7);
-          return `${y}-W${String(wk).padStart(2,'0')}`;
-        }
-      : d => d.slice(0, 7);         // >6 months → monthly candles
+
+  // Follow the D/W/M/Y selector; for daily fall back to span-based grouping so
+  // short periods (1W/1M) produce weekly/monthly candles with real H/L spread.
+  let getKey;
+  if (pcFreq === 'weekly') {
+    getKey = d => _isoWeekKey(d);
+  } else if (pcFreq === 'monthly') {
+    getKey = d => d.slice(0, 7);
+  } else if (pcFreq === 'yearly') {
+    getKey = d => d.slice(0, 4);
+  } else {
+    // daily — auto-pick a period that gives real body height
+    const spanDays = (new Date(snaps[snaps.length-1].date) - new Date(snaps[0].date)) / 864e5;
+    getKey = spanDays <= 14  ? d => _isoWeekKey(d)   // 1W/2W → weekly candles
+           : spanDays <= 60  ? d => _isoWeekKey(d)   // 1M     → weekly candles
+           : spanDays <= 200 ? d => _isoWeekKey(d)   // 3M/6M  → weekly candles
+           : d => d.slice(0, 7);                      // 1Y/ALL → monthly candles
+  }
 
   const buckets = {};
   snaps.forEach(s => {
@@ -3214,7 +3643,7 @@ function renderPortfolioChart() {
   function setDisplay(v) {
     valEl.textContent = fmt$0(v);
     const c = v - firstVal, p = (c / firstVal) * 100;
-    chgEl.innerHTML = `<span class="${c>=0?'chg-up':'chg-dn'}">${fmt$(c,0)} (${fmtPct(p)})</span><span class="pc-period-label"> · ${pcPeriod}</span>`;
+    chgEl.innerHTML = `<span class="${c>=0?'chg-up':'chg-dn'}">${fmt$(c,2)} (${fmtPct(p)})</span><span class="pc-period-label"> · ${pcPeriod}</span>`;
   }
   setDisplay(lastVal);
 
@@ -3616,7 +4045,7 @@ function updateTradePreview() {
   const totalRow = document.getElementById('tr-total-row');
   if (totalRow) {
     totalRow.style.display = (shares > 0 && price > 0) ? 'block' : 'none';
-    document.getElementById('tr-total').textContent = fmt$(total, 0);
+    document.getElementById('tr-total').textContent = fmt$(total, 2);
     document.getElementById('tr-total-label').textContent = _tradeMode === 'buy' ? 'Total Cost' : 'Gross Proceeds';
   }
 
@@ -3669,7 +4098,7 @@ function updateTradePreview() {
       <div class="tr-preview-row">
         <div class="tr-preview-label">Current Position</div>
         <div class="tr-preview-val">${fmtShares(existing.shares)} shares</div>
-        <div class="tr-preview-sub">Avg cost ${fmt$(existing.costBasis)} · Total ${fmt$(existing.shares * existing.costBasis, 0)}</div>
+        <div class="tr-preview-sub">Avg cost ${fmt$(existing.costBasis)} · Total ${fmt$(existing.shares * existing.costBasis, 2)}</div>
       </div>
       <div class="tr-arrow">+ ${fmtShares(shares)} shares @ ${fmt$(price)}</div>
       ` : `
@@ -3685,7 +4114,7 @@ function updateTradePreview() {
         <div class="tr-preview-sub">
           New avg cost ${fmt$(newCost)}
           ${existing ? ` · was ${fmt$(existing.costBasis)}` : ''}
-          · Total invested ${fmt$(newShares * newCost, 0)}
+          · Total invested ${fmt$(newShares * newCost, 2)}
         </div>
       </div>`;
   } else {
@@ -3710,7 +4139,7 @@ function updateTradePreview() {
       <div class="tr-arrow">− ${fmtShares(shares)} shares sold @ ${fmt$(price)}</div>
       <div class="tr-preview-row">
         <div class="tr-preview-label">Realized Gain/Loss</div>
-        <div class="tr-preview-val ${gainLoss >= 0 ? 'chg-up' : 'chg-dn'}">${gainLoss >= 0 ? '+' : ''}${fmt$(gainLoss, 0)}</div>
+        <div class="tr-preview-val ${gainLoss >= 0 ? 'chg-up' : 'chg-dn'}">${gainLoss >= 0 ? '+' : ''}${fmt$(gainLoss, 2)}</div>
         <div class="tr-preview-sub">${fmtPct((price / existing.costBasis - 1) * 100)} vs avg cost</div>
       </div>
       <div class="tr-preview-after ${isClosed ? 'close' : 'sell'}">
@@ -4028,9 +4457,21 @@ if (window.electronAPI) {
       msg.textContent = 'Update downloaded \u2014 restart to install.';
       progressWrap.style.display = 'none';
       restartBtn.style.display = 'inline-block';
+    } else if (type === 'not-available') {
+      const note = document.getElementById('sp-update-note');
+      if (note) { note.textContent = 'You\u2019re up to date.'; setTimeout(() => { note.textContent = ''; }, 4000); }
     }
-    // type === 'error': leave banner hidden, fail silently
   });
+}
+
+function checkForUpdatesNow() {
+  const note = document.getElementById('sp-update-note');
+  if (!window.electronAPI) {
+    if (note) note.textContent = 'Only available in the installed app.';
+    return;
+  }
+  if (note) note.textContent = 'Checking\u2026';
+  window.electronAPI.checkForUpdates();
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -4214,6 +4655,19 @@ function launchTourFromSettings() {
   startTour();
 }
 
+async function confirmResetPortfolio() {
+  const confirmed = confirm(
+    'Reset your entire portfolio?\n\nThis will permanently delete all holdings and cannot be undone.'
+  );
+  if (!confirmed) return;
+  const r = await fetch('/api/setup', { method: 'DELETE' });
+  if (!r.ok) return;
+  document.getElementById('settings-backdrop').style.display = 'none';
+  _pcSnaps = [];
+  portfolioData = null;
+  location.reload();
+}
+
 function endTour() {
   document.getElementById('tour-overlay').style.display = 'none';
   document.querySelectorAll('.tour-highlight').forEach(el => el.classList.remove('tour-highlight'));
@@ -4315,6 +4769,11 @@ function positionTourCard(targetEl) {
 (async () => {
   initTheme();
   initZoom();
+  updateMarketStatus();
+  fetch('/api/version').then(r => r.json()).then(d => {
+    const el = document.getElementById('sp-ver-num');
+    if (el) el.textContent = 'v' + d.version;
+  }).catch(() => {});
 
   // Check if portfolio has been configured
   const sr = await fetch('/api/setup-status');
@@ -4331,6 +4790,16 @@ function positionTourCard(targetEl) {
     setTimeout(checkTourPrompt, 600); // show first-launch prompt after UI settles
   }
 })();
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.tab-group')) closeTabDropdowns();
+});
+
+document.addEventListener('keydown', e => {
+  const tag = document.activeElement?.tagName;
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+  if (e.key === 'r' || e.key === 'R') fetchPrices();
+});
 </script>
 </body>
 </html>

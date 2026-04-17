@@ -95,6 +95,9 @@ function startAutoUpdater() {
     autoUpdater.on('update-downloaded', () => {
       mainWindow?.webContents.send('update-status', { type: 'ready' });
     });
+    autoUpdater.on('update-not-available', () => {
+      mainWindow?.webContents.send('update-status', { type: 'not-available' });
+    });
     autoUpdater.on('error', err => {
       console.warn('[updater]', err.message);
       // Don't surface update errors to the user — fail silently
@@ -106,6 +109,20 @@ function startAutoUpdater() {
     console.warn('[updater] not available:', err.message);
   }
 }
+
+// "Check for Updates" button in Settings triggers this
+ipcMain.on('check-for-updates', () => {
+  if (!app.isPackaged) {
+    mainWindow?.webContents.send('update-status', { type: 'not-available' });
+    return;
+  }
+  try {
+    const { autoUpdater } = require('electron-updater');
+    autoUpdater.checkForUpdates().catch(err => console.warn('[updater]', err.message));
+  } catch (err) {
+    console.warn('[updater] check failed:', err.message);
+  }
+});
 
 // "Restart Now" button in the renderer triggers this
 ipcMain.on('install-update', () => {
